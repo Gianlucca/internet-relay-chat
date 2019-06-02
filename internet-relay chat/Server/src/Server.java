@@ -5,7 +5,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 
 class Server extends Thread {
-    public final static int PORT = 9876;
+    private final static int PORT = 9876;
     private final static int BUFFER = 1024;
 
     private DatagramSocket socket;
@@ -13,22 +13,23 @@ class Server extends Thread {
     private HashSet<String> existingClients;
     private ArrayList<User> clients;
 
-    public Server() throws IOException {
+    private Server() throws IOException {
         socket = new DatagramSocket(PORT);
-        existingClients = new HashSet();
-        clients = new ArrayList();
+        existingClients = new HashSet<String>();
+        clients = new ArrayList<User>();
+        channels = new HashSet<>();
     }
 
     public void run() {
         System.out.println("Server is now running. ");
         byte[] receiveData = new byte[BUFFER];
-        try{
-            while(true) {
+        while(true) {
+            try{
                 Arrays.fill(receiveData, (byte)0);
                 DatagramPacket packet = new DatagramPacket(receiveData, receiveData.length);
                 socket.receive(packet);
 
-                String content = new String(packet.getData());
+                String content = new String(packet.getData()).trim();
                 InetAddress IPAddress = packet.getAddress();
                 int port = packet.getPort();
                 String id = IPAddress.toString() + ":" + port;
@@ -41,13 +42,11 @@ class Server extends Thread {
                     //usuario está no lobby
                     User sender = getUserById(IPAddress.toString(), port);
                     if(sender != null){
-                        //tratar mensagens que podem ser usadas no lobby
-                        System.out.println(sender.getNickname() + ": " + content);
 
                         // /nick <nickname>Solicita a alteração do apelido do usuário
                         if(content.startsWith("NICK ")){
                             System.out.println(" Velho nick: " + sender.getNickname());
-                            sender.setNickname(content.split(" ", 2)[1]);
+                            sender.setNickname(content.split(" ", 2)[1].trim());
                             System.out.println(" Novo nick: " + sender.getNickname());
                         }
                         // /create <channel> criar canal novo com o usuario que criou como admin, nome do admin deve ter * na frente
@@ -67,19 +66,24 @@ class Server extends Thread {
 
                         }
                         else{
-                            byte[] data = (sender.getNickname() + ": " +  content).getBytes();
+                            String senderName = sender.getNickname();
+                            String msg = senderName.trim() + ": " + content.trim();
+
+                            System.out.println(msg);
+                            byte data[] = (msg).getBytes();
                             for (User user : clients) {
-                                packet = new DatagramPacket(data, data.length, user.getIPAddress(), user.getPort());
-                                socket.send(packet);
+                                DatagramPacket echoPacket = new DatagramPacket(data, data.length, user.getIPAddress(), user.getPort());
+                                socket.send(echoPacket);
                             }
                         }
                     }
                 }
+            }catch(Exception e) {
+               System.err.println(e);
             }
-        }catch(Exception e) {
-            System.err.println(e);
         }
     }
+
 
     private User getUserById(String ip, int port){
         for (User user : clients) {

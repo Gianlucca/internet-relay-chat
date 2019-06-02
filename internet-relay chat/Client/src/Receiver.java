@@ -1,9 +1,10 @@
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
+import java.util.Arrays;
 
 public class Receiver implements Runnable {
-    DatagramSocket socket;
-    byte buffer[];
+    private DatagramSocket socket;
+    private byte[] buffer;
 
     Receiver(DatagramSocket socket) {
         this.socket = socket;
