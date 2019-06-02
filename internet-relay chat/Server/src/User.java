@@ -11,6 +11,7 @@ public class User {
         this.port = port;
     }
 
+
     public InetAddress getIPAddress() {
         return IPAddress;
     }
@@ -26,4 +27,6 @@ public class User {
     public void setNickname(String nickname) {
         this.nickname = nickname;
     }
+
+
 }

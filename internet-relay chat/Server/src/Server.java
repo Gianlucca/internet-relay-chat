@@ -22,8 +22,8 @@ class Server extends Thread {
     public void run() {
         System.out.println("Server is now running. ");
         byte[] receiveData = new byte[BUFFER];
-        while(true) {
-            try{
+        try{
+            while(true) {
                 Arrays.fill(receiveData, (byte)0);
                 DatagramPacket packet = new DatagramPacket(receiveData, receiveData.length);
                 socket.receive(packet);
@@ -37,34 +37,57 @@ class Server extends Thread {
                     System.out.println(" conectado: " + id + " " + content);
                     existingClients.add( id );
                     clients.add(new User(content, IPAddress, port));
-                } else{//usuario está no lobby
+                } else{
+                    //usuario está no lobby
+                    User sender = getUserById(IPAddress.toString(), port);
+                    if(sender != null){
+                        //tratar mensagens que podem ser usadas no lobby
+                        System.out.println(sender.getNickname() + ": " + content);
 
-                    //tratar mensagens que podem ser usadas no lobby
-                    System.out.println(id + " " + content);
+                        // /nick <nickname>Solicita a alteração do apelido do usuário
+                        if(content.startsWith("NICK ")){
+                            System.out.println(" Velho nick: " + sender.getNickname());
+                            sender.setNickname(content.split(" ", 2)[1]);
+                            System.out.println(" Novo nick: " + sender.getNickname());
+                        }
+                        // /create <channel> criar canal novo com o usuario que criou como admin, nome do admin deve ter * na frente
+                        else if(content.startsWith("CREATE ")){
 
-                    // /nick <nickname>Solicita a alteração do apelido do usuário
-                    if(content.startsWith("NICK ")){
-                        for (User user : clients) {
-                            if(user.getIPAddress().equals(IPAddress) && user.getPort() == port){
-                                System.out.println(" Velho nick: " + user.getNickname());
-                                user.setNickname(content.split(" ", 2)[1]);
-                                System.out.println(" Novo nick: " + user.getNickname());
+                        }
+                        // /list mostra canais criados no servidor
+                        else if(content.startsWith("LIST ")){
+
+                        }
+                        // /join <channel> solicita a participação em um canal
+                        else if(content.startsWith("JOIN ")){
+
+                        }
+                        // /quit encerra conexao do usuario
+                        else if(content.startsWith("QUIT ")){
+
+                        }
+                        else{
+                            byte[] data = (sender.getNickname() + ": " +  content).getBytes();
+                            for (User user : clients) {
+                                packet = new DatagramPacket(data, data.length, user.getIPAddress(), user.getPort());
+                                socket.send(packet);
                             }
                         }
                     }
-
-
-
-                    // /create <channel> criar canal novo com o usuario que criou como admin, nome do admin deve ter * na frente
-                    // /list mostra canais criados no servidor
-                    // /join <channel> solicita a participação em um canal
-                    // /quit encerra conexao do usuario
-
                 }
-            }catch(Exception e) {
-                System.err.println(e);
+            }
+        }catch(Exception e) {
+            System.err.println(e);
+        }
+    }
+
+    private User getUserById(String ip, int port){
+        for (User user : clients) {
+            if(user.getIPAddress().toString().equals(ip) && user.getPort() == port){
+                return user;
             }
         }
+        return null;
     }
 
     public static void main(String args[]) throws Exception{
