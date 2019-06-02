@@ -1,33 +1,35 @@
-// Lê uma linha do teclado
-// Envia o pacote (linha digitada) ao servidor
-import java.io.*; // classes para input e output streams e
-import java.net.*;// DatagramaSocket,InetAddress,DatagramaPacket
+import java.io.*;
+import java.net.*;
 
 class Client {
     public static void main(String args[]) throws Exception{
-        // cria o stream do teclado
         BufferedReader inFromUser = new BufferedReader(new InputStreamReader(System.in));
-
-        // declara socket cliente
         DatagramSocket clientSocket = new DatagramSocket();
-
-        // obtem endereço IP do servidor com o DNS
         InetAddress IPAddress = InetAddress.getByName("localhost");
 
-        byte[] sendData = new byte[1024];
-        byte[] receiveData = new byte[1024];
+        System.out.println("Digite seu nick: ");
 
-        // l� uma linha do teclado
         String sentence = inFromUser.readLine();
-        sendData = sentence.getBytes();
+        byte[] sendData = sentence.getBytes();
 
-        // cria pacote com o dado, o endereço do server e porta do servidor
         DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, IPAddress, 9876);
-
-        //envia o pacote
         clientSocket.send(sendPacket);
 
-        // fecha o cliente
+        byte[] receiveData = new byte[1024];
+        do {
+            String newSentence = inFromUser.readLine();
+            if(newSentence.startsWith("/")){
+                String[] command = newSentence.split(" ", 2);
+                newSentence = command[0].replaceFirst("/", "").toUpperCase() + " " + command[1];
+            }
+            sendData = newSentence.getBytes();
+
+            sendPacket = new DatagramPacket(sendData, sendData.length, IPAddress, 9876);
+            clientSocket.send(sendPacket);
+            if (newSentence.toLowerCase().startsWith("/quit")){
+                break;
+            }
+        }while (true);
         clientSocket.close();
     }
 }
