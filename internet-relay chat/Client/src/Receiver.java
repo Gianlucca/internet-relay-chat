@@ -1,6 +1,5 @@
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
-import java.util.Arrays;
 
 public class Receiver implements Runnable {
     private DatagramSocket socket;
@@ -17,7 +16,11 @@ public class Receiver implements Runnable {
                 DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
                 socket.receive(packet);
                 String received = new String(packet.getData(), 0, packet.getLength());
+                if(received.equals(Messages.LOGGED_IN_PM)){
+                    Client.connected = true;
+                }
                 System.out.println(received);
+                Client.PORT = packet.getPort();
             } catch(Exception e) {
                 System.err.println(e);
             }

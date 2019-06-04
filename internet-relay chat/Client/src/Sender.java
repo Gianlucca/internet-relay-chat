@@ -5,7 +5,6 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 
 public class Sender implements Runnable{
-    public final static int PORT = 9876;
     private DatagramSocket socket;
     private String hostname;
 
@@ -17,23 +16,21 @@ public class Sender implements Runnable{
     private void sendMessage(String message) throws Exception {
         byte buf[] = message.getBytes();
         InetAddress address = InetAddress.getByName(hostname);
-        DatagramPacket packet = new DatagramPacket(buf, buf.length, address, PORT);
+        DatagramPacket packet = new DatagramPacket(buf, buf.length, address, Client.PORT);
         socket.send(packet);
     }
 
     public void run() {
-        boolean connected = false;
         do {
             try {
                 BufferedReader inFromUser = new BufferedReader(new InputStreamReader(System.in));
-                System.out.println("Digite seu nick: ");
+                System.out.println(Messages.INSERT_USERNAME);
                 String sentence = inFromUser.readLine();
                 sendMessage(sentence);
-                connected = true;
             } catch (Exception e) {
 
             }
-        } while (!connected);
+        } while (!Client.connected);
         BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
         while (true) {
             try {

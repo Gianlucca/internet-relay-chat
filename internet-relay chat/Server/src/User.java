@@ -4,6 +4,7 @@ public class User {
     private String nickname;
     private InetAddress IPAddress;
     private int port;
+    private Channel channel;
 
     public User(String nickname, InetAddress IPAddress, int port){
         this.IPAddress = IPAddress;
@@ -28,5 +29,11 @@ public class User {
         this.nickname = nickname;
     }
 
+    public void setChannel(Channel channel) {
+        this.channel = channel;
+    }
 
+    public Channel getChannel() {
+        return channel;
+    }
 }
