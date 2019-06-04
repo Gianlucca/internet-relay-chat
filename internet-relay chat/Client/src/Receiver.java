@@ -7,7 +7,7 @@ public class Receiver implements Runnable {
 
     Receiver(DatagramSocket socket) {
         this.socket = socket;
-        buffer = new byte[1024];
+        buffer = new byte[Client.BUFFER_SIZE];
     }
 
     public void run() {
@@ -21,6 +21,7 @@ public class Receiver implements Runnable {
                     Client.connected = true;
                 }
                 Client.PORT = packet.getPort();
+
             } catch(Exception e) {
                 System.err.println(e);
             }

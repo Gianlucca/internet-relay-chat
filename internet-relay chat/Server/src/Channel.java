@@ -8,13 +8,14 @@ public class Channel extends Thread{
     private final static int BUFFER = 1024;
 
     private User admin;
-    private String name;
-    private ArrayList<User> users;
+    private static ArrayList<User> users;
     private DatagramSocket socket;
+    private static InetAddress IPAddress;
+    private static int port;
 
     public Channel(User admin, String name){
         this.admin = admin;
-        this.name = "#"+name;
+        setName(name);
         this.users = new ArrayList<>();
         this.admin.setNickname("*" + this.admin.getNickname());
         users.add(this.admin);
@@ -42,7 +43,9 @@ public class Channel extends Thread{
                 InetAddress IPAddress = packet.getAddress();
                 int port = packet.getPort();
 
-                echoMessage(content);
+                User sender = getUserById(IPAddress.toString(), port);
+
+                echoMessage("<"+sender.getNickname()+">: "+content);
 
                 System.out.println("Mensagem recebida: " + content);
             }
@@ -55,6 +58,19 @@ public class Channel extends Thread{
         return users.size();
     }
 
+    public static void inviteUser(User user, Channel c){
+        user.setChannel(c);
+        users.add(user);
+
+        byte[] data = Messages.CHANNEL_WELCOME_MESSAGE.getBytes();
+        try{
+            c.socket.send( new DatagramPacket(data, data.length, user.getIPAddress(), user.getPort()));
+        }catch (Exception e){
+
+
+        }
+    }
+
     private void echoMessage(String message) throws Exception{
         byte[] data = ("<"+message+">").getBytes();
         for (User user : users) {
@@ -62,4 +78,15 @@ public class Channel extends Thread{
             socket.send(echoPacket);
         }
     }
+
+    private User getUserById(String ip, int port){
+        for (User user : users) {
+            if(user.getIPAddress().toString().equals(ip) && user.getPort() == port){
+                return user;
+            }
+        }
+        return null;
+    }
+
+
 }

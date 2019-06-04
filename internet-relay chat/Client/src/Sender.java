@@ -27,24 +27,55 @@ public class Sender implements Runnable{
                 System.out.println(Messages.INSERT_USERNAME);
                 String sentence = inFromUser.readLine();
                 sendMessage(sentence);
+                Thread.sleep(1000);
             } catch (Exception e) {
 
             }
         } while (!Client.connected);
         BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
-        while (true) {
+        boolean alive = true;
+        while (alive) {
             try {
-                String newSentence = in.readLine();
-                if(newSentence.startsWith("/")){
-                    String[] command = newSentence.split(" ", 2);
-                    newSentence = command[0].replaceFirst("/", "").toUpperCase() + " " + command[1];
+                String newSentence = in.readLine().trim();
+                if(newSentence.getBytes().length <= Client.BUFFER_SIZE ){
+                    if(newSentence.startsWith("/")){
+                        if(newSentence.toLowerCase().startsWith("/nick") || newSentence.toLowerCase().startsWith("/create") || newSentence.toLowerCase().startsWith("/join")){
+                            String[] command = newSentence.split(" ");
+                            if(command.length <= 2){
+                                newSentence = command[0].replaceFirst("/", "").toUpperCase() + " " + command[1];
+                                sendMessage(newSentence);
+                            }else throw new ArrayIndexOutOfBoundsException();
+                        }else if(newSentence.toLowerCase().startsWith("/list")){
+                            newSentence = newSentence.replaceFirst("/", "").toUpperCase().substring(0,4);
+                            sendMessage(newSentence);
+                        }else if(newSentence.toLowerCase().startsWith("/quit")){
+                            newSentence = newSentence.replaceFirst("/", "").toUpperCase().substring(0,4);
+                            sendMessage(newSentence);
+                            alive = false;
+                        }//else if( newSentence.toLowerCase().startsWith("/remove"){
+                         //}//
+                            //
+                            // || newSentence.toLowerCase().startsWith("/part")
+                            // || newSentence.toLowerCase().startsWith("/names")
+                            // || newSentence.toLowerCase().startsWith("/kick")
+                            // || newSentence.toLowerCase().startsWith("/msg")
+                            // || newSentence.toLowerCase().startsWith("/message")
+                            // || newSentence.toLowerCase().startsWith("/quit")
+                        //){
+
+                        else{
+                            System.out.println(Messages.INVALID_COMMAND);
+                        }
+                    }else{
+                        sendMessage(newSentence);
+                    }
+                }else{
+                    System.err.println(Messages.MESSAGE_TOO_LONG);
                 }
-                sendMessage(newSentence);
-                if (newSentence.toLowerCase().startsWith("/quit")){
-                    break;
-                }
-            } catch(Exception e) {
-                System.err.println(e);
+            } catch(ArrayIndexOutOfBoundsException e) {
+                System.err.println(Messages.NO_PARAMETER);
+            }catch(Exception e) {
+                System.err.println(Messages.ERROR);
             }
         }
     }

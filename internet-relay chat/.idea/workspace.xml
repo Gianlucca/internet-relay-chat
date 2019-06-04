@@ -2,7 +2,10 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="6a77a883-0f79-4234-8c1c-e26cf022c15e" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/Client/src/Client.java" beforeDir="false" afterPath="$PROJECT_DIR$/Client/src/Client.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Client/src/Messages.java" beforeDir="false" afterPath="$PROJECT_DIR$/Client/src/Messages.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Client/src/Receiver.java" beforeDir="false" afterPath="$PROJECT_DIR$/Client/src/Receiver.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Client/src/Sender.java" beforeDir="false" afterPath="$PROJECT_DIR$/Client/src/Sender.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Server/src/Channel.java" beforeDir="false" afterPath="$PROJECT_DIR$/Server/src/Channel.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Server/src/Messages.java" beforeDir="false" afterPath="$PROJECT_DIR$/Server/src/Messages.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Server/src/Server.java" beforeDir="false" afterPath="$PROJECT_DIR$/Server/src/Server.java" afterDir="false" />
@@ -22,16 +25,18 @@
     <option name="IS_AUTOSCROLL_TO_SOURCE" value="true" />
   </component>
   <component name="FileEditorManager">
-    <splitter split-orientation="horizontal" split-proportion="0.36112744">
+    <splitter split-orientation="horizontal" split-proportion="0.39635935">
       <split-first>
         <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
           <file pinned="false" current-in-tab="true">
             <entry file="file://$PROJECT_DIR$/Server/src/Server.java">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="357">
-                  <caret line="111" lean-forward="true" selection-start-line="111" selection-end-line="111" />
+                <state relative-caret-position="411">
+                  <caret line="74" column="38" lean-forward="true" selection-start-line="74" selection-start-column="38" selection-end-line="74" selection-end-column="38" />
                   <folding>
                     <element signature="imports" expanded="true" />
+                    <element signature="e#4853#5927#1" />
+                    <element signature="e#6085#6212#1" />
                   </folding>
                 </state>
               </provider>
@@ -57,7 +62,7 @@
         </leaf>
       </split-first>
       <split-second>
-        <splitter split-orientation="horizontal" split-proportion="0.4319853">
+        <splitter split-orientation="horizontal" split-proportion="0.55544746">
           <split-first>
             <splitter split-orientation="vertical" split-proportion="0.59046584">
               <split-first>
@@ -65,8 +70,8 @@
                   <file pinned="false" current-in-tab="true">
                     <entry file="file://$PROJECT_DIR$/Server/src/Channel.java">
                       <provider selected="true" editor-type-id="text-editor">
-                        <state relative-caret-position="376">
-                          <caret line="63" column="5" lean-forward="true" selection-start-line="63" selection-start-column="5" selection-end-line="63" selection-end-column="5" />
+                        <state relative-caret-position="221">
+                          <caret line="64" column="54" selection-start-line="64" selection-start-column="54" selection-end-line="64" selection-end-column="54" />
                           <folding>
                             <element signature="imports" expanded="true" />
                             <element signature="e#1799#1800#0" expanded="true" />
@@ -83,8 +88,8 @@
                   <file pinned="false" current-in-tab="true">
                     <entry file="file://$PROJECT_DIR$/Server/src/Messages.java">
                       <provider selected="true" editor-type-id="text-editor">
-                        <state relative-caret-position="142">
-                          <caret line="9" column="77" selection-start-line="9" selection-start-column="77" selection-end-line="9" selection-end-column="77" />
+                        <state relative-caret-position="85">
+                          <caret line="11" column="86" selection-start-line="11" selection-start-column="86" selection-end-line="11" selection-end-column="86" />
                         </state>
                       </provider>
                     </entry>
@@ -94,23 +99,23 @@
             </splitter>
           </split-first>
           <split-second>
-            <splitter split-orientation="vertical" split-proportion="0.5016251">
+            <splitter split-orientation="vertical" split-proportion="0.52380955">
               <split-first>
                 <leaf>
                   <file pinned="false" current-in-tab="false">
                     <entry file="file://$PROJECT_DIR$/Client/src/Client.java">
                       <provider selected="true" editor-type-id="text-editor">
-                        <state relative-caret-position="34">
-                          <caret line="2" column="14" selection-start-line="2" selection-start-column="14" selection-end-line="2" selection-end-column="14" />
+                        <state relative-caret-position="68">
+                          <caret line="4" column="33" selection-start-line="4" selection-start-column="22" selection-end-line="4" selection-end-column="33" />
                         </state>
                       </provider>
                     </entry>
                   </file>
-                  <file pinned="false" current-in-tab="true">
+                  <file pinned="false" current-in-tab="false">
                     <entry file="file://$PROJECT_DIR$/Client/src/Receiver.java">
                       <provider selected="true" editor-type-id="text-editor">
-                        <state relative-caret-position="204">
-                          <caret line="21" column="17" lean-forward="true" selection-start-line="21" selection-start-column="17" selection-end-line="21" selection-end-column="17" />
+                        <state relative-caret-position="199">
+                          <caret line="22" column="47" lean-forward="true" selection-start-line="22" selection-start-column="47" selection-end-line="22" selection-end-column="47" />
                           <folding>
                             <element signature="imports" expanded="true" />
                           </folding>
@@ -118,11 +123,11 @@
                       </provider>
                     </entry>
                   </file>
-                  <file pinned="false" current-in-tab="false">
+                  <file pinned="false" current-in-tab="true">
                     <entry file="file://$PROJECT_DIR$/Client/src/Messages.java">
                       <provider selected="true" editor-type-id="text-editor">
-                        <state relative-caret-position="102">
-                          <caret line="6" selection-start-line="6" selection-end-line="6" />
+                        <state relative-caret-position="119">
+                          <caret line="7" column="56" lean-forward="true" selection-start-line="7" selection-start-column="56" selection-end-line="7" selection-end-column="56" />
                         </state>
                       </provider>
                     </entry>
@@ -134,8 +139,8 @@
                   <file pinned="false" current-in-tab="true">
                     <entry file="file://$PROJECT_DIR$/Client/src/Sender.java">
                       <provider selected="true" editor-type-id="text-editor">
-                        <state relative-caret-position="136">
-                          <caret line="28" column="38" lean-forward="true" selection-start-line="28" selection-start-column="38" selection-end-line="28" selection-end-column="38" />
+                        <state relative-caret-position="-334">
+                          <caret line="46" column="77" lean-forward="true" selection-start-line="43" selection-start-column="28" selection-end-line="46" selection-end-column="77" />
                           <folding>
                             <element signature="imports" expanded="true" />
                           </folding>
@@ -169,12 +174,12 @@
         <option value="$PROJECT_DIR$/Client/src/Lobby.form" />
         <option value="$PROJECT_DIR$/Server/src/User.java" />
         <option value="$PROJECT_DIR$/Client/src/Client.java" />
-        <option value="$PROJECT_DIR$/Client/src/Sender.java" />
         <option value="$PROJECT_DIR$/Client/src/Messages.java" />
         <option value="$PROJECT_DIR$/Client/src/Receiver.java" />
+        <option value="$PROJECT_DIR$/Client/src/Sender.java" />
         <option value="$PROJECT_DIR$/Server/src/Channel.java" />
-        <option value="$PROJECT_DIR$/Server/src/Messages.java" />
         <option value="$PROJECT_DIR$/Server/src/Server.java" />
+        <option value="$PROJECT_DIR$/Server/src/Messages.java" />
       </list>
     </option>
   </component>
@@ -304,8 +309,8 @@
       <window_info id="Capture Tool" order="5" />
       <window_info id="Favorites" order="6" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
-      <window_info anchor="bottom" id="Find" order="1" sideWeight="0.4993573" weight="0.32974428" />
-      <window_info active="true" anchor="bottom" id="Run" order="2" sideWeight="0.48987207" visible="true" weight="0.22643554" />
+      <window_info active="true" anchor="bottom" id="Find" order="1" sideWeight="0.4993573" visible="true" weight="0.32936078" />
+      <window_info anchor="bottom" id="Run" order="2" sideWeight="0.48987207" weight="0.22643554" />
       <window_info anchor="bottom" id="Debug" order="3" sideWeight="0.4903599" weight="0.39973083" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
@@ -385,32 +390,15 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/Client/src/Client.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="34">
-          <caret line="2" column="14" selection-start-line="2" selection-start-column="14" selection-end-line="2" selection-end-column="14" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Client/src/Messages.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="102">
-          <caret line="6" selection-start-line="6" selection-end-line="6" />
+        <state relative-caret-position="68">
+          <caret line="4" column="33" selection-start-line="4" selection-start-column="22" selection-end-line="4" selection-end-column="33" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/Client/src/Receiver.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="204">
-          <caret line="21" column="17" lean-forward="true" selection-start-line="21" selection-start-column="17" selection-end-line="21" selection-end-column="17" />
-          <folding>
-            <element signature="imports" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Client/src/Sender.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="136">
-          <caret line="28" column="38" lean-forward="true" selection-start-line="28" selection-start-column="38" selection-end-line="28" selection-end-column="38" />
+        <state relative-caret-position="199">
+          <caret line="22" column="47" lean-forward="true" selection-start-line="22" selection-start-column="47" selection-end-line="22" selection-end-column="47" />
           <folding>
             <element signature="imports" expanded="true" />
           </folding>
@@ -419,8 +407,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/Server/src/Channel.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="376">
-          <caret line="63" column="5" lean-forward="true" selection-start-line="63" selection-start-column="5" selection-end-line="63" selection-end-column="5" />
+        <state relative-caret-position="221">
+          <caret line="64" column="54" selection-start-line="64" selection-start-column="54" selection-end-line="64" selection-end-column="54" />
           <folding>
             <element signature="imports" expanded="true" />
             <element signature="e#1799#1800#0" expanded="true" />
@@ -429,20 +417,39 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Server/src/Messages.java">
+    <entry file="file://$PROJECT_DIR$/Client/src/Sender.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="142">
-          <caret line="9" column="77" selection-start-line="9" selection-start-column="77" selection-end-line="9" selection-end-column="77" />
+        <state relative-caret-position="-334">
+          <caret line="46" column="77" lean-forward="true" selection-start-line="43" selection-start-column="28" selection-end-line="46" selection-end-column="77" />
+          <folding>
+            <element signature="imports" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Client/src/Messages.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="119">
+          <caret line="7" column="56" lean-forward="true" selection-start-line="7" selection-start-column="56" selection-end-line="7" selection-end-column="56" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/Server/src/Server.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="357">
-          <caret line="111" lean-forward="true" selection-start-line="111" selection-end-line="111" />
+        <state relative-caret-position="411">
+          <caret line="74" column="38" lean-forward="true" selection-start-line="74" selection-start-column="38" selection-end-line="74" selection-end-column="38" />
           <folding>
             <element signature="imports" expanded="true" />
+            <element signature="e#4853#5927#1" />
+            <element signature="e#6085#6212#1" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Server/src/Messages.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="85">
+          <caret line="11" column="86" selection-start-line="11" selection-start-column="86" selection-end-line="11" selection-end-column="86" />
         </state>
       </provider>
     </entry>

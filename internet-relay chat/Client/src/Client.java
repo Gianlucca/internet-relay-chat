@@ -1,6 +1,8 @@
 import java.net.*;
 
 class Client {
+
+    public static int BUFFER_SIZE = 1024;
     public static int PORT = 9876;
     public static boolean connected = false;
 
