@@ -39,35 +39,34 @@ public class Sender implements Runnable{
                 String newSentence = in.readLine().trim();
                 if(newSentence.getBytes().length <= Client.BUFFER_SIZE ){
                     if(newSentence.startsWith("/")){
-                        if(newSentence.toLowerCase().startsWith("/nick") || newSentence.toLowerCase().startsWith("/create") || newSentence.toLowerCase().startsWith("/join")){
+                        if(newSentence.toLowerCase().startsWith("/nick")
+                                || newSentence.toLowerCase().startsWith("/create")
+                                || newSentence.toLowerCase().startsWith("/join")
+                                || newSentence.toLowerCase().startsWith("/part")
+                                || newSentence.toLowerCase().startsWith("/msg")
+                                || newSentence.toLowerCase().startsWith("/remove")
+                                || newSentence.toLowerCase().startsWith("/kick")){
                             String[] command = newSentence.split(" ");
                             if(command.length != 2){
                                 newSentence = command[0].replaceFirst("/", "").toUpperCase() + " " + command[1];
                                 sendMessage(newSentence);
-                            }else throw new ArrayIndexOutOfBoundsException();
-                        }else if(newSentence.toLowerCase().startsWith("/list")){
+                            }
+                            else throw new ArrayIndexOutOfBoundsException();
+                        }
+                        else if(newSentence.toLowerCase().startsWith("/list")
+                                || newSentence.toLowerCase().startsWith("/help")){
                             newSentence = newSentence.replaceFirst("/", "").toUpperCase().substring(0,4);
                             sendMessage(newSentence);
                         }
-                        else if(newSentence.toLowerCase().startsWith("/help")){
-                            newSentence = newSentence.replaceFirst("/", "").toUpperCase().substring(0,4);
-                            sendMessage(newSentence);
-                        }
-                        else if(newSentence.toLowerCase().startsWith("/quit")){
-                            newSentence = newSentence.replaceFirst("/", "").toUpperCase().substring(0,4);
+                        else if(newSentence.toLowerCase().startsWith("/quit")) {
+                            newSentence = newSentence.replaceFirst("/", "").toUpperCase().substring(0, 4);
                             sendMessage(newSentence);
                             alive = false;
-                        }//else if( newSentence.toLowerCase().startsWith("/remove"){
-                         //}//
-                            //
-                            // || newSentence.toLowerCase().startsWith("/part")
-                            // || newSentence.toLowerCase().startsWith("/names")
-                            // || newSentence.toLowerCase().startsWith("/kick")
-                            // || newSentence.toLowerCase().startsWith("/msg")
-                            // || newSentence.toLowerCase().startsWith("/message")
-                            // || newSentence.toLowerCase().startsWith("/quit")
-                        //){
-
+                        }
+                        else if(newSentence.toLowerCase().startsWith("/names")){
+                            newSentence = newSentence.replaceFirst("/", "").toUpperCase().substring(0, 5);
+                            sendMessage(newSentence);
+                        }
                         else{
                             System.out.println(Messages.INVALID_COMMAND);
                         }

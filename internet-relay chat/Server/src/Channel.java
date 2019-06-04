@@ -63,10 +63,7 @@ public class Channel extends Thread{
         byte[] data = Messages.CHANNEL_WELCOME_MESSAGE.getBytes();
         try{
             c.socket.send( new DatagramPacket(data, data.length, user.getIPAddress(), user.getPort()));
-        }catch (Exception e){
-
-
-        }
+        }catch (Exception e){ }
     }
 
     private void echoMessage(String message) throws Exception{
