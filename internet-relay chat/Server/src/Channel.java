@@ -56,7 +56,7 @@ public class Channel extends Thread{
     }
 
     private void echoMessage(String message) throws Exception{
-        byte data[] = (message).getBytes();
+        byte[] data = ("<"+message+">").getBytes();
         for (User user : users) {
             DatagramPacket echoPacket = new DatagramPacket(data, data.length, user.getIPAddress(), user.getPort());
             socket.send(echoPacket);

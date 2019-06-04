@@ -91,12 +91,17 @@ class Server extends Thread {
                             // /list mostra canais criados no servidor
                             StringBuilder channelList = new StringBuilder();
                             channelList.append(Messages.AVAILABLE_CHANNELS);
-                            for (Channel channel : channels){
-                                String channelName = channel.getName() + " - " + channel.getUsersOnline() + " online users \n";
-                                channelList.append(channelName);
+                            if(!channels.isEmpty()){
+                                for (Channel channel : channels){
+                                    String channelName = channel.getName() + " - " + channel.getUsersOnline() + " online users \n";
+                                    channelList.append(channelName);
+                                }
+                                byte[] data = channelList.toString().getBytes();
+                                socket.send( new DatagramPacket(data, data.length, sender.getIPAddress(), sender.getPort()));
+                            }else{
+                                byte[] data = Messages.NO_AVAILABLE_CHANNELS.getBytes();
+                                socket.send( new DatagramPacket(data, data.length, sender.getIPAddress(), sender.getPort()));
                             }
-                            byte[] data = channelList.toString().getBytes();
-                            socket.send( new DatagramPacket(data, data.length, sender.getIPAddress(), sender.getPort()));
                         }
                         else if(content.startsWith("JOIN ")){
                             // /join <channel> solicita a participação em um canal
@@ -122,7 +127,7 @@ class Server extends Thread {
     }
 
     private void echoMessage(String message) throws Exception{
-        byte data[] = (message).getBytes();
+        byte[] data = ("<"+message+">").getBytes();
         for (User user : clients) {
             DatagramPacket echoPacket = new DatagramPacket(data, data.length, user.getIPAddress(), user.getPort());
             socket.send(echoPacket);
@@ -138,7 +143,7 @@ class Server extends Thread {
         return null;
     }
 
-    public static void main(String args[]) throws Exception{
+    public static void main(String[] args) throws Exception{
         Server s = new Server();
         s.start();
     }
