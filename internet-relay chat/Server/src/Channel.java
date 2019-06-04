@@ -43,9 +43,42 @@ public class Channel extends Thread{
 
                 User sender = getUserById(IPAddress.toString(), port);
 
-                echoMessage("<"+sender.getNickname()+">: "+content);
+                if(admin == sender){
+                    if(content.startsWith("REMOVE ")){
 
-                System.out.println("Mensagem recebida: " + content);
+                    }
+                    else if(content.startsWith("KICK ")){
+
+                    }
+                }
+                if(content.startsWith("NICK ")){
+
+                }
+                else if(content.startsWith("JOIN")){
+
+                }
+                else if(content.startsWith("LIST")){
+
+                }
+                else if(content.startsWith("PART")){
+
+                }
+                else if(content.startsWith("MSG")){
+
+                }
+                else if(content.startsWith("HELP")){
+
+                }
+                else if(content.startsWith("QUIT")){
+
+                }
+                else if(content.startsWith("NAMES")){
+
+                }
+                else{
+                    echoMessage("<"+sender.getNickname()+">: "+content);
+                    System.out.println("<"+sender.getNickname()+">: "+ content);
+                }
             }
         }catch(Exception e){
             System.err.println(e);

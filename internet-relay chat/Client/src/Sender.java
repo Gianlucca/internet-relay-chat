@@ -47,7 +47,7 @@ public class Sender implements Runnable{
                                 || newSentence.toLowerCase().startsWith("/remove")
                                 || newSentence.toLowerCase().startsWith("/kick")){
                             String[] command = newSentence.split(" ");
-                            if(command.length != 2){
+                            if(command.length != 1){
                                 newSentence = command[0].replaceFirst("/", "").toUpperCase() + " " + command[1];
                                 sendMessage(newSentence);
                             }
