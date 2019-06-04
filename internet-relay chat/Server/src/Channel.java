@@ -10,8 +10,6 @@ public class Channel extends Thread{
     private User admin;
     private static ArrayList<User> users;
     private DatagramSocket socket;
-    private static InetAddress IPAddress;
-    private static int port;
 
     public Channel(User admin, String name){
         this.admin = admin;
