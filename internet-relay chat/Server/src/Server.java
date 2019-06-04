@@ -43,69 +43,69 @@ class Server extends Thread {
                         byte[] accepted = Messages.LOGGED_IN_PM.getBytes();
                         socket.send( new DatagramPacket(accepted, accepted.length, IPAddress, port));
                     }
+                    else {
+                        byte[] accepted = Messages.SET_NICKNAME_ERROR.getBytes();
+                        socket.send( new DatagramPacket(accepted, accepted.length, IPAddress, port));
+                    }
                 } else{
                     //usuario está no lobby
                     User sender = getUserById(IPAddress.toString(), port);
-                    if(sender != null){
-                        if(content.startsWith("NICK ") || content.startsWith("CREATE ") || content.startsWith("JOIN ") ) {
-                            String command = content.split(" ")[1].trim();
-                            if (content.startsWith("NICK ")) {
-                                // /nick <nickname> - Solicita a alteração do apelido do usuário
-                                String oldNick = sender.getNickname();
-                                sender.setNickname(command);
-                                System.out.println(oldNick + Messages.CHANGED_NAME + sender.getNickname());
-                                echoMessage(oldNick + Messages.CHANGED_NAME + sender.getNickname());
-                            }
-                            else if (content.startsWith("CREATE ")) {
-                                // /create <channel> criar canal novo com o usuario que criou como admin, nome do admin deve ter * na frente
-                                if (channelExists(command)) {
-                                    byte[] denied = Messages.CHANNEL_NAME_ALREADY_EXISTS.getBytes();
-                                    socket.send(new DatagramPacket(denied, denied.length, sender.getIPAddress(), sender.getPort()));
-                                } else {
-                                    sender.setChannel(new Channel(sender, command));
-                                    channels.add(sender.getChannel());
-                                    clients.remove(sender);
-                                    sender.getChannel().start();
-                                }
-                            } else if (content.startsWith("JOIN ")) {
-                                // /join <channel> solicita a participação em um canal
-                                //verificar se canal existe
-                                if(channelExists(command)){
-                                    Channel.inviteUser(sender, getChannelByName(command));
-                                }else{
-                                    byte[] denied = Messages.CHANNEL_NAME_DOESNT_EXIST.getBytes();
-                                    socket.send( new DatagramPacket(denied, denied.length, IPAddress, port));
-                                }
-                            }
-                        }
-                        else if(content.startsWith("LIST")){
-                            // /list mostra canais criados no servidor
-                            StringBuilder channelList = new StringBuilder();
-                            channelList.append(Messages.AVAILABLE_CHANNELS);
-                            channelList.append(getName() + " - " + clients.size() + " online users \n");
-                            if(!channels.isEmpty()){
-                                for (Channel channel : channels){
-                                    String channelName = channel.getName() + " - " + channel.getUsersOnline() + " online users \n";
-                                    channelList.append(channelName);
-                                }
-                            }
-                            byte[] data = channelList.toString().getBytes();
-                            socket.send( new DatagramPacket(data, data.length, sender.getIPAddress(), sender.getPort()));
-                        }
-                        else if(content.startsWith("QUIT")){
-                            // /quit encerra conexao do usuario
-                            clients.remove(sender);
-                            existingClients.remove(id);
-                            echoMessage(sender.getNickname() + Messages.USER_DISCONNECTED);
-                            System.out.println(sender.getNickname() + Messages.USER_DISCONNECTED);;
-                        }
-                        else{
-                            String senderName = sender.getNickname();
-                            String msg =  "<" + senderName.trim() + ">: " + content.trim();
 
-                            System.out.println(msg);
-                            echoMessage(msg);
+                    if(content.startsWith("NICK ") || content.startsWith("CREATE ") || content.startsWith("JOIN ") ) {
+                        String command = content.split(" ")[1].trim();
+                        if (content.startsWith("NICK ")) {
+                            // /nick <nickname> - Solicita a alteração do apelido do usuário
+                            String oldNick = sender.getNickname();
+                            sender.setNickname(command);
+                            System.out.println(oldNick + Messages.CHANGED_NAME + sender.getNickname());
+                            echoMessage(oldNick + Messages.CHANGED_NAME + sender.getNickname());
                         }
+                        else if (content.startsWith("CREATE ")) {
+                            // /create <channel> criar canal novo com o usuario que criou como admin, nome do admin deve ter * na frente
+                            if (channelExists(command)) {
+                                byte[] denied = Messages.CHANNEL_NAME_ALREADY_EXISTS.getBytes();
+                                socket.send(new DatagramPacket(denied, denied.length, sender.getIPAddress(), sender.getPort()));
+                            }
+                            else createChannel(sender, command);
+                        }
+                        else if (content.startsWith("JOIN ")) {
+                            // /join <channel> solicita a participação em um canal
+                            if(channelExists(command)){
+                                Channel.inviteUser(sender, getChannelByName(command));
+                                System.out.println( sender.getNickname() + Messages.USER_JOINING_CHANNEL  + command);
+                            }
+                            else createChannel(sender, command);
+                        }
+                    }
+                    else if(content.startsWith("LIST")){
+                        // /list mostra canais criados no servidor
+                        StringBuilder channelList = new StringBuilder();
+                        channelList.append(Messages.AVAILABLE_CHANNELS);
+                        channelList.append(getName() + " - " + clients.size() + " online users \n");
+                        if(!channels.isEmpty()){
+                            for (Channel channel : channels){
+                                String channelName = channel.getName() + " - " + channel.getUsersOnline() + " online users \n";
+                                channelList.append(channelName);
+                            }
+                        }
+                        byte[] data = channelList.toString().getBytes();
+                        socket.send( new DatagramPacket(data, data.length, sender.getIPAddress(), sender.getPort()));
+                    }
+                    else if(content.startsWith("QUIT")){
+                        // /quit encerra conexao do usuario
+                        clients.remove(sender);
+                        existingClients.remove(id);
+                        echoMessage(sender.getNickname() + Messages.USER_DISCONNECTED);
+                        System.out.println(sender.getNickname() + Messages.USER_DISCONNECTED);
+                    }
+                    else if(content.startsWith("HELP")){
+                        byte[] data = Messages.LOBBY_HELP.getBytes();
+                        socket.send( new DatagramPacket(data, data.length, sender.getIPAddress(), sender.getPort()));
+                    }
+                    else{
+                        System.err.println(Messages.INVALID_COMMAND);
+                        byte[] data = Messages.INVALID_COMMAND.getBytes();
+                        socket.send( new DatagramPacket(data, data.length, sender.getIPAddress(), sender.getPort()));
                     }
                 }
             }catch(Exception e) {
@@ -131,6 +131,19 @@ class Server extends Thread {
         return null;
     }
 
+    private void createChannel(User user, String command){
+        try {
+            user.setChannel(new Channel(user, command));
+            channels.add(user.getChannel());
+            clients.remove(user);
+            System.out.println(user.getNickname() + Messages.CHANNEL_CREATED + "#" + command);
+            echoMessage(user.getNickname() + Messages.CHANNEL_CREATED + "#" + command);
+            user.getChannel().start();
+        }
+        catch(Exception e){
+
+        }
+    }
 
     private Channel getChannelByName(String channel){
         for (Channel c : channels) {

@@ -41,14 +41,19 @@ public class Sender implements Runnable{
                     if(newSentence.startsWith("/")){
                         if(newSentence.toLowerCase().startsWith("/nick") || newSentence.toLowerCase().startsWith("/create") || newSentence.toLowerCase().startsWith("/join")){
                             String[] command = newSentence.split(" ");
-                            if(command.length <= 2){
+                            if(command.length != 2){
                                 newSentence = command[0].replaceFirst("/", "").toUpperCase() + " " + command[1];
                                 sendMessage(newSentence);
                             }else throw new ArrayIndexOutOfBoundsException();
                         }else if(newSentence.toLowerCase().startsWith("/list")){
                             newSentence = newSentence.replaceFirst("/", "").toUpperCase().substring(0,4);
                             sendMessage(newSentence);
-                        }else if(newSentence.toLowerCase().startsWith("/quit")){
+                        }
+                        else if(newSentence.toLowerCase().startsWith("/help")){
+                            newSentence = newSentence.replaceFirst("/", "").toUpperCase().substring(0,4);
+                            sendMessage(newSentence);
+                        }
+                        else if(newSentence.toLowerCase().startsWith("/quit")){
                             newSentence = newSentence.replaceFirst("/", "").toUpperCase().substring(0,4);
                             sendMessage(newSentence);
                             alive = false;
