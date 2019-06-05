@@ -9,8 +9,8 @@ class Server extends Thread {
     private final static int BUFFER = 1024;
 
     private static DatagramSocket socket;
-    public static HashSet<String> existingClients;
     private static ArrayList<User> clients;
+    public static HashSet<String> existingClients;
     public static ArrayList<Channel> channels;
 
     private Server() throws IOException {
@@ -79,16 +79,35 @@ class Server extends Thread {
         }
     }
 
+    public static boolean channelExists(String channel){
+        for (Channel c : channels)
+            if (c.getName().equals(channel))
+                return true;
+        return false;
+    }
+
+    private void createChannel(User user, String command){
+        try {
+            Channel c = new Channel(user, command);
+            user.setChannel(c);
+            channels.add(c);
+            clients.remove(user);
+            echoMessage(user.getNickname() + Messages.CHANNEL_CREATED + "#" + command);
+            user.getChannel().start();
+        }catch(Exception e){messageUser(user, Messages.CHANNEL_SOCKET_ERROR);}
+    }
+
     private void echoMessage(String message){
         System.err.println(message);
         for (User user : clients)
             messageUser(user,message);
     }
 
-    private static void messageUser(User user, String message){
-        byte[] data = message.getBytes();
-        try{ socket.send(new DatagramPacket(data, data.length, user.getIPAddress(), user.getPort()));}
-        catch (Exception e){ }
+    public static Channel getChannelByName(String channel){
+        for (Channel c : channels)
+            if (c.getName().equals(channel))
+                return c;
+        return null;
     }
 
     private User getUserById(String ip, int port){
@@ -110,34 +129,15 @@ class Server extends Thread {
         return channelList.toString();
     }
 
-    private void createChannel(User user, String command){
-        try {
-            Channel c = new Channel(user, command);
-            user.setChannel(c);
-            channels.add(c);
-            clients.remove(user);
-            echoMessage(user.getNickname() + Messages.CHANNEL_CREATED + "#" + command);
-            user.getChannel().start();
-        }catch(Exception e){messageUser(user, Messages.CHANNEL_SOCKET_ERROR);}
+    private static void messageUser(User user, String message){
+        byte[] data = message.getBytes();
+        try{ socket.send(new DatagramPacket(data, data.length, user.getIPAddress(), user.getPort()));}
+        catch (Exception e){ }
     }
 
     public static void partChannel(User user){
         clients.add(user);
         Server.messageUser(user, user.getNickname() + " " + Messages.PART_CHANNEL);
-    }
-
-    public static Channel getChannelByName(String channel){
-        for (Channel c : channels)
-            if (c.getName().equals(channel))
-                return c;
-        return null;
-    }
-
-    public static boolean channelExists(String channel){
-        for (Channel c : channels)
-            if (c.getName().equals(channel))
-                return true;
-        return false;
     }
 
     public static void main(String[] args) throws Exception{

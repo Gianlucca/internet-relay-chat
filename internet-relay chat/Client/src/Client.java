@@ -6,7 +6,6 @@ class Client {
     public static int PORT = 9876;
     public static boolean connected = false;
 
-
     public static void main(String args[]) throws Exception{
         String host = "192.168.0.17";
         DatagramSocket socket = new DatagramSocket();
