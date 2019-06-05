@@ -71,6 +71,7 @@ class Server extends Thread {
                         else if (content.startsWith("JOIN ")) {
                             // /join <channel> solicita a participação em um canal
                             if(channelExists(command)){
+                                clients.remove(sender);
                                 Channel.inviteUser(sender, getChannelByName(command));
                                 System.out.println( sender.getNickname() + Messages.USER_JOINING_CHANNEL  + command);
                             }
@@ -78,8 +79,6 @@ class Server extends Thread {
                         }
                     }
                     else if(content.startsWith("LIST")){
-                        // /list mostra canais criados no servidor
-
                         byte[] data = listServers().getBytes();
                         socket.send( new DatagramPacket(data, data.length, sender.getIPAddress(), sender.getPort()));
                     }
