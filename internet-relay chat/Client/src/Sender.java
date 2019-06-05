@@ -41,7 +41,6 @@ public class Sender implements Runnable{
                         if(newSentence.toLowerCase().startsWith("/nick")
                                 || newSentence.toLowerCase().startsWith("/create")
                                 || newSentence.toLowerCase().startsWith("/join")
-                                || newSentence.toLowerCase().startsWith("/remove")
                                 || newSentence.toLowerCase().startsWith("/kick")){
                             String[] command = newSentence.split(" ");
                             if(command.length == 2){
@@ -63,6 +62,9 @@ public class Sender implements Runnable{
                         }
                         else if(newSentence.toLowerCase().startsWith("/names")){
                             newSentence = newSentence.replaceFirst("/", "").toUpperCase().substring(0, 5);
+                            sendMessage(newSentence);
+                        }else if(newSentence.toLowerCase().startsWith("/remove")){
+                            newSentence = newSentence.replaceFirst("/", "").toUpperCase().substring(0, 6);
                             sendMessage(newSentence);
                         }
                         else if(newSentence.toLowerCase().startsWith("/msg")){

@@ -36,7 +36,6 @@ class Server extends Thread {
 
                 if(!existingClients.contains(id)){
                     if(!content.contains(" ")){
-                        System.out.println("<" +content+ ">" + Messages.LOGGED_IN);
                         echoMessage("<" +content+ ">" + Messages.LOGGED_IN);
                         existingClients.add(id);
                         clients.add(new User(content, IPAddress, port));
@@ -57,7 +56,6 @@ class Server extends Thread {
                             // /nick <nickname> - Solicita a alteração do apelido do usuário
                             String oldNick = sender.getNickname();
                             sender.setNickname(command);
-                            System.out.println(oldNick + Messages.CHANGED_NAME + sender.getNickname());
                             echoMessage(oldNick + Messages.CHANGED_NAME + sender.getNickname());
                         }
                         else if (content.startsWith("CREATE ")) {
@@ -87,7 +85,6 @@ class Server extends Thread {
                         clients.remove(sender);
                         existingClients.remove(id);
                         echoMessage(sender.getNickname() + Messages.USER_DISCONNECTED);
-                        System.out.println(sender.getNickname() + Messages.USER_DISCONNECTED);
                     }
                     else if(content.startsWith("HELP")){
                         byte[] data = Messages.LOBBY_HELP.getBytes();
@@ -106,6 +103,7 @@ class Server extends Thread {
     }
 
     private void echoMessage(String message) throws Exception{
+        System.err.println(message);
         byte[] data = (message).getBytes();
         for (User user : clients) {
             DatagramPacket echoPacket = new DatagramPacket(data, data.length, user.getIPAddress(), user.getPort());
@@ -140,7 +138,6 @@ class Server extends Thread {
             user.setChannel(new Channel(user, command));
             channels.add(user.getChannel());
             clients.remove(user);
-            System.out.println(user.getNickname() + Messages.CHANNEL_CREATED + "#" + command);
             echoMessage(user.getNickname() + Messages.CHANNEL_CREATED + "#" + command);
             user.getChannel().start();
         }

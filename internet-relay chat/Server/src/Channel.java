@@ -12,10 +12,10 @@ public class Channel extends Thread{
     private DatagramSocket socket;
 
     public Channel(User admin, String name){
-        this.admin = admin;
+        Channel.admin = admin;
         setName(name);
-        this.users = new ArrayList<>();
-        users.add(this.admin);
+        Channel.users = new ArrayList<>();
+        users.add(Channel.admin);
         try {
             socket = new DatagramSocket();
             socket.send(new DatagramPacket((Messages.CHANNEL_CREATE_MESSAGE + name).getBytes(),
@@ -43,8 +43,8 @@ public class Channel extends Thread{
                 User sender = getUserById(IPAddress.toString(), port);
 
                 if(admin == sender){
-                    this.admin.setNickname("*" + this.admin.getNickname());
-                    if(content.startsWith("REMOVE ")){
+                    Channel.admin.setNickname("*" + Channel.admin.getNickname());
+                    if(content.startsWith("REMOVE")){
                         for (User user :users ) {
                             users.remove(user);
                             if(admin == user){
@@ -52,17 +52,41 @@ public class Channel extends Thread{
                             }
                             user.setChannel(null);
                             echoMessage(user.getNickname() + Messages.USER_DISCONNECTED);
-                            System.out.println(user.getNickname() + Messages.USER_DISCONNECTED);
 
                             byte[] data = Messages.CHANNEL_CLOSING.getBytes();
                             socket.send(new DatagramPacket(data, data.length, user.getIPAddress(), user.getPort()));
 
                             Server.partChannel(user);
                         }
-                        break;
+                        return;
                     }
                     else if(content.startsWith("KICK ")){
+                        if(admin.getNickname().equals(content)){
+                            byte[] data = Messages.CANT_KICK_YOURSELF.getBytes();
+                            socket.send(new DatagramPacket(data, data.length, sender.getIPAddress(), sender.getPort()));
+                        }else{
+                            String command = content.split(" ")[1].trim();
+                            User kick = null;
+                            for (User user : users) {
+                                if(user.getNickname().equals(command)){
+                                    kick = user;
+                                }
+                            }
+                            if(kick == null){
+                                byte[] data = Messages.USER_NOT_FOUND.getBytes();
+                                socket.send(new DatagramPacket(data, data.length, sender.getIPAddress(), sender.getPort()));
+                            }
+                            else{
+                                users.remove(kick);
+                                kick.setChannel(null);
+                                echoMessage(kick.getNickname() + Messages.USER_KICKED);
 
+                                byte[] data = Messages.YOU_GOT_KICKED.getBytes();
+                                socket.send(new DatagramPacket(data, data.length, kick.getIPAddress(), kick.getPort()));
+
+                                Server.partChannel(kick);
+                            }
+                        }
                     }
                 }
 
@@ -71,7 +95,6 @@ public class Channel extends Thread{
                     if (content.startsWith("NICK ")) {
                         String oldNick = sender.getNickname();
                         sender.setNickname(command);
-                        System.out.println(oldNick + Messages.CHANGED_NAME + sender.getNickname());
                         echoMessage(oldNick + Messages.CHANGED_NAME + sender.getNickname());
                     } else if (content.startsWith("JOIN")) {
                         if (Server.channelExists(command)) {
@@ -94,7 +117,6 @@ public class Channel extends Thread{
                     }
                     sender.setChannel(null);
                     echoMessage(sender.getNickname() + Messages.USER_DISCONNECTED);
-                    System.out.println(sender.getNickname() + Messages.USER_DISCONNECTED);
                     Server.partChannel(sender);
                 }
                 else if(content.startsWith("MSG")){
@@ -110,8 +132,6 @@ public class Channel extends Thread{
                     String id = IPAddress.toString() + ":" + port;
                     Server.existingClients.remove(id);
                     echoMessage(sender.getNickname() + Messages.USER_DISCONNECTED);
-                    System.out.println(sender.getNickname() + Messages.USER_DISCONNECTED);
-
                 }
                 else if(content.startsWith("NAMES")){
                     byte[] data = listsUsers().getBytes();
@@ -119,7 +139,6 @@ public class Channel extends Thread{
                 }
                 else{
                     echoMessage("<"+sender.getNickname()+">: "+content);
-                    System.out.println("<"+sender.getNickname()+">: "+ content);
                 }
             }
         }catch(Exception e){
@@ -166,6 +185,7 @@ public class Channel extends Thread{
     }
 
     private void echoMessage(String message) throws Exception{
+        System.out.println(message);
         byte[] data = message.getBytes();
         for (User user : users) {
             DatagramPacket echoPacket = new DatagramPacket(data, data.length, user.getIPAddress(), user.getPort());

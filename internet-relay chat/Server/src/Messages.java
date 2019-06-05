@@ -20,5 +20,9 @@ public class Messages {
     public final static String CHANNEL_NOT_FOUND = "Canal não encontrado.";
     public final static String ONLINE_USERS = "Usuários ativos no canal: \n";
     public final static String CHANNEL_CLOSING = "O administrador está fechando o canal. Todos os usuários serão enviados para o Lobby automaticamente.";
+    public final static String CANT_KICK_YOURSELF = "O que você está fazendo?";
+    public final static String USER_NOT_FOUND = "O usuário não existe";
+    public final static String USER_KICKED = " foi removido pelo administrador.";
+    public final static String YOU_GOT_KICKED = "Você foi removido pelo administrador.";
 }
 
