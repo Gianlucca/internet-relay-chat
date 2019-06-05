@@ -12,13 +12,13 @@ public class Channel extends Thread{
     private DatagramSocket socket;
 
     public Channel(User admin, String name){
-        admin.setNickname("*"+admin.getNickname());
-        admin = admin;
-        setName(name);
-        users = new ArrayList<>();
         try {
             socket = new DatagramSocket();
         }catch(Exception e){}
+        admin.setNickname("*"+admin.getNickname());
+        this.admin = admin;
+        setName(name);
+        users = new ArrayList<>();
         users.add(admin);
         messageUser(admin, Messages.CHANNEL_CREATE_MESSAGE + name);
     }
@@ -52,6 +52,10 @@ public class Channel extends Thread{
                             }
                         } else if (content.startsWith("JOIN")) {
                             if (Server.channelExists(command)) {
+                                if(admin == sender){
+                                    sender.setNickname(sender.getNickname().substring(1));
+                                    admin = sender;
+                                }
                                 users.remove(sender);
                                 Channel.inviteUser(sender, Server.getChannelByName(command));
                             } else
@@ -61,13 +65,24 @@ public class Channel extends Thread{
                         messageUser(sender, listServers());
                     else if (content.startsWith("PART")) {
                         users.remove(sender);
-                        if (admin == sender)
+                        if (admin == sender){
                             sender.setNickname(sender.getNickname().substring(1));
+                            admin = sender;
+                        }
                         sender.setChannel(null);
                         echoMessage(sender.getNickname() + Messages.USER_DISCONNECTED);
                         Server.partChannel(sender);
                     } else if (content.startsWith("MSG")) {
-
+                        String[] command = content.split(" ");
+                        boolean userExists = false;
+                        for (User user : users) {
+                            if(user.getNickname().equals(command[1])){
+                                userExists = true;
+                                String message = "<"+sender.getNickname()+">:" + command[2];
+                                messageUser(user, message);
+                            }
+                        }
+                        if(!userExists) messageUser(sender, Messages.USER_NOT_FOUND);
                     } else if (content.startsWith("HELP"))
                         messageUser(sender, Messages.CHANNEL_HELP);
                     else if (content.startsWith("QUIT")) {
@@ -86,6 +101,7 @@ public class Channel extends Thread{
                                 users.remove(user);
                                 if (admin == user) {
                                     user.setNickname(user.getNickname().substring(1));
+                                    admin = user;
                                 }
                                 user.setChannel(null);
                                 echoMessage(user.getNickname() + Messages.USER_DISCONNECTED);
@@ -116,17 +132,15 @@ public class Channel extends Thread{
                                 }
                             }
                             sender.setNickname("*" + sender.getNickname());
-                        } else {
-                            echoMessage("<" + sender.getNickname() + ">: " + content);
                         }
-                    } else {
-                        echoMessage("<" + sender.getNickname() + ">: " + content);
+                        else
+                            echoMessage("<" + sender.getNickname() + ">: " + content);
                     }
+                    else
+                        echoMessage("<" + sender.getNickname() + ">: " + content);
                 }
             }
-        }catch(Exception e){
-            System.err.println(e);
-        }
+        }catch(Exception e){ System.err.println(e); }
     }
 
     private String listUsers(){

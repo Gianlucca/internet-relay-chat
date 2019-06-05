@@ -68,7 +68,7 @@ public class Sender implements Runnable{
                             sendMessage(newSentence);
                         }
                         else if(newSentence.toLowerCase().startsWith("/msg")){
-                            String[] command = newSentence.split(" ");
+                            String[] command = newSentence.split(" ", 3);
                             if(command.length == 3){
                                 newSentence = command[0].replaceFirst("/", "").toUpperCase() + " " + command[1] + " " + command[2];
                                 sendMessage(newSentence);
