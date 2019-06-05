@@ -45,7 +45,21 @@ public class Channel extends Thread{
                 if(admin == sender){
                     this.admin.setNickname("*" + this.admin.getNickname());
                     if(content.startsWith("REMOVE ")){
+                        for (User user :users ) {
+                            users.remove(user);
+                            if(admin == user){
+                                user.setNickname(user.getNickname().substring(1));
+                            }
+                            user.setChannel(null);
+                            echoMessage(user.getNickname() + Messages.USER_DISCONNECTED);
+                            System.out.println(user.getNickname() + Messages.USER_DISCONNECTED);
 
+                            byte[] data = Messages.CHANNEL_CLOSING.getBytes();
+                            socket.send(new DatagramPacket(data, data.length, user.getIPAddress(), user.getPort()));
+
+                            Server.partChannel(user);
+                        }
+                        break;
                     }
                     else if(content.startsWith("KICK ")){
 
@@ -70,14 +84,13 @@ public class Channel extends Thread{
                     }
                 }
                 else if(content.startsWith("LIST")){
-                    // /list mostra canais criados no servidor
                     byte[] data = listServers().getBytes();
                     socket.send( new DatagramPacket(data, data.length, sender.getIPAddress(), sender.getPort()));
                 }
                 else if(content.startsWith("PART")){
                     users.remove(sender);
                     if(admin == sender){
-                        sender.setNickname(sender.getNickname().replaceFirst("\\*", ""));
+                        sender.setNickname(sender.getNickname().substring(1));
                     }
                     sender.setChannel(null);
                     echoMessage(sender.getNickname() + Messages.USER_DISCONNECTED);

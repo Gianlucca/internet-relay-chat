@@ -18,7 +18,7 @@ public class Messages {
     public final static String PART_CHANNEL = " voltou para o Lobby.";
     public final static String USER_JOINING_CHANNEL = " entrou no canal ";
     public final static String CHANNEL_NOT_FOUND = "Canal não encontrado.";
-    public final static String ONLINE_USERS = "Usuários ativos no canal:";
-
+    public final static String ONLINE_USERS = "Usuários ativos no canal: \n";
+    public final static String CHANNEL_CLOSING = "O administrador está fechando o canal. Todos os usuários serão enviados para o Lobby automaticamente.";
 }
 
