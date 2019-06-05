@@ -15,8 +15,10 @@ public class Messages {
     public final static String SERVER_RUNNING = "Servidor está ONLINE";
     public final static String SET_NICKNAME_ERROR = "Não utilize espaços.";
     public final static String USER_DISCONNECTED = " saiu.";
+    public final static String PART_CHANNEL = " voltou para o Lobby.";
     public final static String USER_JOINING_CHANNEL = " entrou no canal ";
-
+    public final static String CHANNEL_NOT_FOUND = "Canal não encontrado.";
+    public final static String ONLINE_USERS = "Usuários ativos no canal:";
 
 }
 

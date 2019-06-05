@@ -8,7 +8,7 @@ class Client {
 
 
     public static void main(String args[]) throws Exception{
-        String host = "10.132.247.69";
+        String host = "localhost";
         DatagramSocket socket = new DatagramSocket();
         Receiver r = new Receiver(socket);
         Sender s = new Sender(socket, host);
