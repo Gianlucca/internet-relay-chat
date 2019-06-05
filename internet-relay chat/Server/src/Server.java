@@ -51,18 +51,16 @@ class Server extends Thread {
                             sender.setNickname(command);
                             echoMessage(oldNick + Messages.CHANGED_NAME + sender.getNickname());
                         }
-                        else if (content.startsWith("CREATE ")) {
+                        else if (content.startsWith("CREATE "))
                             if (channelExists(command))
                                 messageUser(sender, Messages.CHANNEL_NAME_ALREADY_EXISTS);
                             else createChannel(sender, command);
-                        }
-                        else if (content.startsWith("JOIN ")) {
+                        else if (content.startsWith("JOIN "))
                             if(channelExists(command)){
                                 clients.remove(sender);
                                 Channel.inviteUser(sender, getChannelByName(command));
                             }
                             else createChannel(sender, command);
-                        }
                     }
                     else if(content.startsWith("LIST"))
                         messageUser(sender, listServers());
@@ -77,9 +75,7 @@ class Server extends Thread {
                         System.err.println(Messages.INVALID_COMMAND);
                         messageUser(sender, Messages.INVALID_COMMAND);}
                 }
-            }catch(Exception e) {
-               System.err.println(Messages.INVALID_COMMAND);
-            }
+            }catch(Exception e) { System.err.println(Messages.INVALID_COMMAND); }
         }
     }
 
@@ -87,7 +83,6 @@ class Server extends Thread {
         System.err.println(message);
         for (User user : clients)
             messageUser(user,message);
-
     }
 
     private static void messageUser(User user, String message){
@@ -97,11 +92,9 @@ class Server extends Thread {
     }
 
     private User getUserById(String ip, int port){
-        for (User user : clients) {
-            if(user.getIPAddress().toString().equals(ip) && user.getPort() == port){
+        for (User user : clients)
+            if(user.getIPAddress().toString().equals(ip) && user.getPort() == port)
                 return user;
-            }
-        }
         return null;
     }
 
@@ -109,12 +102,11 @@ class Server extends Thread {
         StringBuilder channelList = new StringBuilder();
         channelList.append(Messages.AVAILABLE_CHANNELS);
         channelList.append(getName() + " - " + clients.size() + " online users \n");
-        if(!channels.isEmpty()){
+        if(!channels.isEmpty())
             for (Channel channel : channels){
-                String channelName = channel.getName() + " - " + channel.getUsersOnline() + " online users \n";
+                String channelName = "#" + channel.getName() + " - " + channel.getUsersOnline() + " online users \n";
                 channelList.append(channelName);
             }
-        }
         return channelList.toString();
     }
 
@@ -126,7 +118,7 @@ class Server extends Thread {
             clients.remove(user);
             echoMessage(user.getNickname() + Messages.CHANNEL_CREATED + "#" + command);
             user.getChannel().start();
-        }catch(Exception e){}
+        }catch(Exception e){messageUser(user, Messages.CHANNEL_SOCKET_ERROR);}
     }
 
     public static void partChannel(User user){

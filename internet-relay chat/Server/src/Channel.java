@@ -7,6 +7,7 @@ import java.util.Arrays;
 public class Channel extends Thread{
     private final static int BUFFER = 1024;
 
+    volatile boolean stop = false;
     private User admin;
     private ArrayList<User> users;
     private DatagramSocket socket;
@@ -26,7 +27,7 @@ public class Channel extends Thread{
     public void run(){
         byte[] receiveData = new byte[BUFFER];
         try{
-            while(true) {
+            while(!stop) {
                 Arrays.fill(receiveData, (byte) 0);
                 DatagramPacket packet = new DatagramPacket(receiveData, receiveData.length);
                 socket.receive(packet);
@@ -96,21 +97,9 @@ public class Channel extends Thread{
                         if (!sender.getNickname().substring(0, 1).equals("*")) {
                             sender.setNickname("*" + admin.getNickname());
                         }
-                        if (content.startsWith("REMOVE")) {
-                            for (User user : users) {
-                                users.remove(user);
-                                if (admin == user) {
-                                    user.setNickname(user.getNickname().substring(1));
-                                    admin = user;
-                                }
-                                user.setChannel(null);
-                                echoMessage(user.getNickname() + Messages.USER_DISCONNECTED);
-                                messageUser(user, Messages.CHANNEL_CLOSING);
-                                Server.partChannel(user);
-                            }
-                            Server.channels.remove(getName());
-                            return;
-                        } else if (content.startsWith("KICK ")) {
+                        if (content.startsWith("REMOVE"))
+                            removeChannel(sender);
+                        else if (content.startsWith("KICK ")) {
                             sender.setNickname(sender.getNickname().substring(1));
                             if (sender.getNickname().equals(content.split(" ")[1].trim()))
                                 messageUser(sender, Messages.CANT_KICK_YOURSELF);
@@ -158,7 +147,7 @@ public class Channel extends Thread{
         channelList.append(Messages.AVAILABLE_CHANNELS);
         if(!Server.channels.isEmpty())
             for (Channel channel : Server.channels){
-                String channelName = channel.getName() + " - " + channel.getUsersOnline() + " online users \n";
+                String channelName = "#"+ channel.getName() + " - " + channel.getUsersOnline() + " online users \n";
                 channelList.append(channelName);
             }
 
@@ -167,6 +156,18 @@ public class Channel extends Thread{
 
     public int getUsersOnline(){
         return users.size();
+    }
+
+    public void removeChannel(User user){
+        Server.channels.remove(user.getChannel());
+        for (User u : users) {
+            if (u == user)
+                user.setNickname(user.getNickname().substring(1));
+            echoMessage(u.getNickname() + Messages.USER_DISCONNECTED);
+            messageUser(u, Messages.CHANNEL_CLOSING);
+            Server.partChannel(u);
+        }
+        stop = true;
     }
 
     public static void inviteUser(User user, Channel c){
