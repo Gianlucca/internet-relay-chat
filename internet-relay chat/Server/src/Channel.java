@@ -73,10 +73,10 @@ public class Channel extends Thread{
                         echoMessage(sender.getNickname() + Messages.USER_DISCONNECTED);
                         Server.partChannel(sender);
                     } else if (content.startsWith("MSG")) {
-                        String[] command = content.split(" ");
+                        String[] command = content.split(" ",3);
                         boolean userExists = false;
                         for (User user : users) {
-                            if(user.getNickname().equals(command[1])){
+                            if(user.getNickname().replace("*","").equals(command[1])){
                                 userExists = true;
                                 String message = "<"+sender.getNickname()+">:" + command[2];
                                 messageUser(user, message);

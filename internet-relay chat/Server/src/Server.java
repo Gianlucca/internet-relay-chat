@@ -37,8 +37,9 @@ class Server extends Thread {
                 if(!existingClients.contains(id)){
                     echoMessage("<" +content+ ">" + Messages.LOGGED_IN);
                     existingClients.add(id);
-                    clients.add(new User(content, IPAddress, port));
-                    messageUser(new User(content, IPAddress, port), Messages.LOGGED_IN_PM);
+                    User u = new User(content, IPAddress, port);
+                    clients.add(u);
+                    messageUser(u, Messages.LOGGED_IN_PM);
                 }
                 else{
                     User sender = getUserById(IPAddress.toString(), port);
@@ -59,7 +60,6 @@ class Server extends Thread {
                             if(channelExists(command)){
                                 clients.remove(sender);
                                 Channel.inviteUser(sender, getChannelByName(command));
-                                System.out.println( sender.getNickname() + Messages.USER_JOINING_CHANNEL  + command);
                             }
                             else createChannel(sender, command);
                         }
