@@ -7,6 +7,7 @@ import java.net.InetAddress;
 public class Sender implements Runnable{
     private DatagramSocket socket;
     private String hostname;
+    private BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
 
     Sender(DatagramSocket socket, String hostname) {
         this.socket = socket;
@@ -23,16 +24,15 @@ public class Sender implements Runnable{
     public void run() {
         do {
             try {
-                BufferedReader inFromUser = new BufferedReader(new InputStreamReader(System.in));
                 System.out.println(Messages.INSERT_USERNAME);
-                String sentence = inFromUser.readLine();
-                sendMessage(sentence);
+                String sentence = in.readLine().trim();
+                if(!sentence.contains("*") && !sentence.contains(" ") && sentence.length() > 0)
+                    sendMessage(sentence);
+                else
+                    System.err.println(Messages.SET_NICKNAME_ERROR);
                 Thread.sleep(1000);
-            } catch (Exception e) {
-
-            }
+            } catch (Exception e) { }
         } while (!Client.connected);
-        BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
         while (true) {
             try {
                 String newSentence = in.readLine().trim();

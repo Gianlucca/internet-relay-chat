@@ -35,16 +35,12 @@ class Server extends Thread {
                 String id = IPAddress.toString() + ":" + port;
 
                 if(!existingClients.contains(id)){
-                    if(!content.contains(" ")){
-                        echoMessage("<" +content+ ">" + Messages.LOGGED_IN);
-                        existingClients.add(id);
-                        clients.add(new User(content, IPAddress, port));
-                        messageUser(new User(content, IPAddress, port), Messages.LOGGED_IN_PM);
-                    }
-                    else
-                        messageUser(new User(content, IPAddress, port), Messages.SET_NICKNAME_ERROR);
-
-                } else{
+                    echoMessage("<" +content+ ">" + Messages.LOGGED_IN);
+                    existingClients.add(id);
+                    clients.add(new User(content, IPAddress, port));
+                    messageUser(new User(content, IPAddress, port), Messages.LOGGED_IN_PM);
+                }
+                else{
                     User sender = getUserById(IPAddress.toString(), port);
 
                     if(content.startsWith("NICK ") || content.startsWith("CREATE ") || content.startsWith("JOIN ") ) {
@@ -124,8 +120,9 @@ class Server extends Thread {
 
     private void createChannel(User user, String command){
         try {
-            user.setChannel(new Channel(user, command));
-            channels.add(user.getChannel());
+            Channel c = new Channel(user, command);
+            user.setChannel(c);
+            channels.add(c);
             clients.remove(user);
             echoMessage(user.getNickname() + Messages.CHANNEL_CREATED + "#" + command);
             user.getChannel().start();

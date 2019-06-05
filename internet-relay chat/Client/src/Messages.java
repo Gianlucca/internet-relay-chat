@@ -5,5 +5,6 @@ public class Messages {
     public final static String LOGGED_IN_PM = "Você acabou de entrar.";
     public final static String MESSAGE_TOO_LONG = "Mensagem muito longa!";
     public final static String NO_PARAMETER = "Por favor, certifique-se de digitar o comando inserindo os parametros caso o comando possua um.";
+    public final static String SET_NICKNAME_ERROR = "Não utilize espaços e simbolos.";
 }
 

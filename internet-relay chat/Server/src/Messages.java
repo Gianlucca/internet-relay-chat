@@ -13,7 +13,6 @@ public class Messages {
     public final static String LOGGED_IN_PM = "Você acabou de entrar.";
     public final static String SERVER_NAME = "Lobby";
     public final static String SERVER_RUNNING = "Servidor está ONLINE";
-    public final static String SET_NICKNAME_ERROR = "Não utilize espaços.";
     public final static String USER_DISCONNECTED = " saiu.";
     public final static String PART_CHANNEL = " voltou para o Lobby.";
     public final static String USER_JOINING_CHANNEL = " entrou no canal ";
@@ -25,4 +24,3 @@ public class Messages {
     public final static String USER_KICKED = " foi removido pelo administrador.";
     public final static String YOU_GOT_KICKED = "Você foi removido pelo administrador.";
 }
-

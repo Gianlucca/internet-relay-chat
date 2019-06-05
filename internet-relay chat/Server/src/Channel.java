@@ -7,15 +7,19 @@ import java.util.Arrays;
 public class Channel extends Thread{
     private final static int BUFFER = 1024;
 
-    private static User admin;
-    private static ArrayList<User> users;
+    private User admin;
+    private ArrayList<User> users;
     private DatagramSocket socket;
 
     public Channel(User admin, String name){
-        Channel.admin = admin;
+        admin.setNickname("*"+admin.getNickname());
+        admin = admin;
         setName(name);
-        Channel.users = new ArrayList<>();
-        users.add(Channel.admin);
+        users = new ArrayList<>();
+        try {
+            socket = new DatagramSocket();
+        }catch(Exception e){}
+        users.add(admin);
         messageUser(admin, Messages.CHANNEL_CREATE_MESSAGE + name);
     }
 
@@ -23,7 +27,7 @@ public class Channel extends Thread{
         byte[] receiveData = new byte[BUFFER];
         try{
             while(true) {
-                Arrays.fill(receiveData, (byte)0);
+                Arrays.fill(receiveData, (byte) 0);
                 DatagramPacket packet = new DatagramPacket(receiveData, receiveData.length);
                 socket.receive(packet);
 
@@ -32,83 +36,92 @@ public class Channel extends Thread{
                 int port = packet.getPort();
 
                 User sender = getUserById(IPAddress.toString(), port);
-
-                if(admin == sender){
-                    Channel.admin.setNickname("*" + Channel.admin.getNickname());
-                    if(content.startsWith("REMOVE")){
-                        for (User user :users ) {
-                            users.remove(user);
-                            if(admin == user){
-                                user.setNickname(user.getNickname().substring(1));
+                if (!content.equals("")) {
+                    if (content.startsWith("NICK ") || content.startsWith("JOIN")) {
+                        String command = content.split(" ")[1].trim();
+                        if (content.startsWith("NICK ")) {
+                            if (admin == sender) {
+                                String oldNick = sender.getNickname();
+                                sender.setNickname("*" + command);
+                                admin = sender;
+                                echoMessage(oldNick + Messages.CHANGED_NAME + sender.getNickname());
+                            } else {
+                                String oldNick = sender.getNickname();
+                                sender.setNickname(command);
+                                echoMessage(oldNick + Messages.CHANGED_NAME + sender.getNickname());
                             }
-                            user.setChannel(null);
-                            echoMessage(user.getNickname() + Messages.USER_DISCONNECTED);
-                            messageUser(user, Messages.CHANNEL_CLOSING);
-                            Server.partChannel(user);
+                        } else if (content.startsWith("JOIN")) {
+                            if (Server.channelExists(command)) {
+                                users.remove(sender);
+                                Channel.inviteUser(sender, Server.getChannelByName(command));
+                            } else
+                                messageUser(sender, Messages.CHANNEL_NOT_FOUND);
                         }
-                        Server.channels.remove(getName());
-                        return;
-                    }
-                    else if(content.startsWith("KICK ")){
-                        if(admin.getNickname().equals(content))
-                            messageUser(sender, Messages.CANT_KICK_YOURSELF);
-                        else{
-                            String command = content.split(" ")[1].trim();
-                            User kick = null;
-                            for (User user : users)
-                                if(user.getNickname().equals(command))
-                                    kick = user;
-                            if(kick == null)
-                                messageUser(sender,Messages.USER_NOT_FOUND);
-                            else{
-                                users.remove(kick);
-                                kick.setChannel(null);
-                                echoMessage(kick.getNickname() + Messages.USER_KICKED);
-                                messageUser(kick, Messages.YOU_GOT_KICKED);
-                                Server.partChannel(kick);
+                    } else if (content.startsWith("LIST"))
+                        messageUser(sender, listServers());
+                    else if (content.startsWith("PART")) {
+                        users.remove(sender);
+                        if (admin == sender)
+                            sender.setNickname(sender.getNickname().substring(1));
+                        sender.setChannel(null);
+                        echoMessage(sender.getNickname() + Messages.USER_DISCONNECTED);
+                        Server.partChannel(sender);
+                    } else if (content.startsWith("MSG")) {
+
+                    } else if (content.startsWith("HELP"))
+                        messageUser(sender, Messages.CHANNEL_HELP);
+                    else if (content.startsWith("QUIT")) {
+                        users.remove(sender);
+                        String id = IPAddress.toString() + ":" + port;
+                        Server.existingClients.remove(id);
+                        echoMessage(sender.getNickname() + Messages.USER_DISCONNECTED);
+                    } else if (content.startsWith("NAMES"))
+                        messageUser(sender, listUsers());
+                    else if (admin == sender) {
+                        if (!sender.getNickname().substring(0, 1).equals("*")) {
+                            sender.setNickname("*" + admin.getNickname());
+                        }
+                        if (content.startsWith("REMOVE")) {
+                            for (User user : users) {
+                                users.remove(user);
+                                if (admin == user) {
+                                    user.setNickname(user.getNickname().substring(1));
+                                }
+                                user.setChannel(null);
+                                echoMessage(user.getNickname() + Messages.USER_DISCONNECTED);
+                                messageUser(user, Messages.CHANNEL_CLOSING);
+                                Server.partChannel(user);
                             }
+                            Server.channels.remove(getName());
+                            return;
+                        } else if (content.startsWith("KICK ")) {
+                            sender.setNickname(sender.getNickname().substring(1));
+                            if (sender.getNickname().equals(content.split(" ")[1].trim()))
+                                messageUser(sender, Messages.CANT_KICK_YOURSELF);
+                            else {
+                                String command = content.split(" ")[1].trim();
+                                User kick = null;
+                                for (User user : users)
+
+                                    if (user.getNickname().equals(command))
+                                        kick = user;
+                                if (kick == null)
+                                    messageUser(sender, Messages.USER_NOT_FOUND);
+                                else {
+                                    users.remove(kick);
+                                    kick.setChannel(null);
+                                    echoMessage(kick.getNickname() + Messages.USER_KICKED);
+                                    messageUser(kick, Messages.YOU_GOT_KICKED);
+                                    Server.partChannel(kick);
+                                }
+                            }
+                            sender.setNickname("*" + sender.getNickname());
+                        } else {
+                            echoMessage("<" + sender.getNickname() + ">: " + content);
                         }
+                    } else {
+                        echoMessage("<" + sender.getNickname() + ">: " + content);
                     }
-                }
-
-                if(content.startsWith("NICK ") || content.startsWith("JOIN")) {
-                    String command = content.split(" ")[1].trim();
-                    if (content.startsWith("NICK ")) {
-                        String oldNick = sender.getNickname();
-                        sender.setNickname(command);
-                        echoMessage(oldNick + Messages.CHANGED_NAME + sender.getNickname());
-                    } else if (content.startsWith("JOIN")) {
-                        if (Server.channelExists(command))
-                            Channel.inviteUser(sender, Server.getChannelByName(command));
-                        else
-                            messageUser(sender, Messages.CHANNEL_NOT_FOUND);
-                    }
-                }
-                else if(content.startsWith("LIST"))
-                    messageUser(sender, listServers());
-                else if(content.startsWith("PART")){
-                    users.remove(sender);
-                    if(admin == sender)
-                        sender.setNickname(sender.getNickname().substring(1));
-                    sender.setChannel(null);
-                    echoMessage(sender.getNickname() + Messages.USER_DISCONNECTED);
-                    Server.partChannel(sender);
-                }
-                else if(content.startsWith("MSG")){
-
-                }
-                else if(content.startsWith("HELP"))
-                    messageUser(sender, Messages.CHANNEL_HELP);
-                else if(content.startsWith("QUIT")){
-                    users.remove(sender);
-                    String id = IPAddress.toString() + ":" + port;
-                    Server.existingClients.remove(id);
-                    echoMessage(sender.getNickname() + Messages.USER_DISCONNECTED);
-                }
-                else if(content.startsWith("NAMES"))
-                    messageUser(sender, listUsers());
-                else{
-                    echoMessage("<"+sender.getNickname()+">: "+content);
                 }
             }
         }catch(Exception e){
@@ -144,11 +157,11 @@ public class Channel extends Thread{
 
     public static void inviteUser(User user, Channel c){
         user.setChannel(c);
-        users.add(user);
-        if(admin == user)
-            admin.setNickname("*" + admin.getNickname());
-
-
+        c.users.add(user);
+        if(c.admin == user){
+            user.setNickname("*" + user.getNickname());
+            c.admin = user;
+        }
         System.out.println(user.getNickname() + Messages.USER_JOINING_CHANNEL + c.getName());
         c.messageUser(user, Messages.CHANNEL_WELCOME_MESSAGE);
     }
