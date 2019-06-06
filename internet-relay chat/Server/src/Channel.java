@@ -78,6 +78,8 @@ public class Channel extends Thread{
                         User u = getUserByNick(command[1]);
                         if(u == null)
                             messageUser(sender, Messages.USER_NOT_FOUND);
+                        else if (u == sender)
+                            messageUser(sender, Messages.CANNOT_MESSAGE_YOURSELF);
                         else
                             messageUser(u, "<"+sender.getNickname()+">:" + command[2]);
                     } else if (content.startsWith("HELP"))
