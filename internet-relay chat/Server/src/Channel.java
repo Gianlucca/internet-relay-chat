@@ -125,7 +125,7 @@ public class Channel extends Thread{
 
     private User getUserByNick(String nick) {
         for (User user : users)
-            if (user.getIPAddress().toString().equals(nick))
+            if (user.getNickname().toString().equals(nick))
                 return user;
         return null;
     }
