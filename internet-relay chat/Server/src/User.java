@@ -5,13 +5,21 @@ public class User {
     private InetAddress IPAddress;
     private int port;
     private Channel channel;
+    private int userId;
+    private static int id = 0;
 
     public User(String nickname, InetAddress IPAddress, int port){
         this.IPAddress = IPAddress;
         this.nickname = nickname;
         this.port = port;
+        this.userId= id;
+        id++;
     }
 
+    public int getId() { return id; }
+
+    public void setId(int id) {this.id = id;
+    }
 
     public InetAddress getIPAddress() {
         return IPAddress;

@@ -5,6 +5,7 @@ class Client {
     public static int BUFFER_SIZE = 1024;
     public static int PORT = 9876;
     public static boolean connected = false;
+    public int id = 00;
 
     public static void main(String args[]) throws Exception{
         String host = "192.168.0.17";

@@ -17,7 +17,7 @@ public class Receiver implements Runnable {
                 socket.receive(packet);
                 String received = new String(packet.getData(), 0, packet.getLength());
                 System.out.println(received);
-                if(received.equals(Messages.LOGGED_IN_PM)){
+                if(received.equals(ServMessages.LOGGED_IN_PM)){
                     Client.connected = true;
                 }
                 Client.PORT = packet.getPort();

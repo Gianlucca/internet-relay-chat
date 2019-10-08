@@ -1,10 +1,12 @@
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
-public class Channel extends Thread{
+public class Channel extends Thread implements ChatServerInterface{
     private final static int BUFFER = 1024;
 
     volatile boolean stop = false;
@@ -21,7 +23,7 @@ public class Channel extends Thread{
         setName(name);
         users = new ArrayList<>();
         users.add(admin);
-        messageUser(admin, Messages.CHANNEL_CREATE_MESSAGE + name);
+        messageUser(admin, ServMessages.CHANNEL_CREATE_MESSAGE + name);
     }
 
     public void run(){
@@ -41,15 +43,16 @@ public class Channel extends Thread{
                     if (content.startsWith("NICK ") || content.startsWith("JOIN")) {
                         String command = content.split(" ")[1].trim();
                         if (content.startsWith("NICK ")) {
-                            if (admin == sender) {
+                            if (nick(sender.getId(), sender.getNickname()) == 200){
                                 String oldNick = sender.getNickname();
                                 sender.setNickname("*" + command);
                                 admin = sender;
-                                echoMessage(oldNick + Messages.CHANGED_NAME + sender.getNickname());
-                            } else {
+                                echoMessage(oldNick + ServMessages.CHANGED_NAME + sender.getNickname());
+                            }
+                            else {
                                 String oldNick = sender.getNickname();
                                 sender.setNickname(command);
-                                echoMessage(oldNick + Messages.CHANGED_NAME + sender.getNickname());
+                                echoMessage(oldNick + ServMessages.CHANGED_NAME + sender.getNickname());
                             }
                         } else if (content.startsWith("JOIN")) {
                             if (Server.channelExists(command)) {
@@ -60,7 +63,7 @@ public class Channel extends Thread{
                                 users.remove(sender);
                                 Channel.inviteUser(sender, Server.getChannelByName(command));
                             } else
-                                messageUser(sender, Messages.CHANNEL_NOT_FOUND);
+                                messageUser(sender, ServMessages.CHANNEL_NOT_FOUND);
                         }
                     } else if (content.startsWith("LIST"))
                         messageUser(sender, listServers());
@@ -71,23 +74,23 @@ public class Channel extends Thread{
                             admin = sender;
                         }
                         sender.setChannel(null);
-                        echoMessage(sender.getNickname() + Messages.USER_DISCONNECTED);
+                        echoMessage(sender.getNickname() + ServMessages.USER_DISCONNECTED);
                         Server.partChannel(sender);
                     } else if (content.startsWith("MSG")) {
                         String[] command = content.split(" ",3);
                         User u = getUserByNick(command[1]);
                         if(u == null)
-                            messageUser(sender, Messages.USER_NOT_FOUND);
+                            messageUser(sender, ServMessages.USER_NOT_FOUND);
                         else if (u == sender)
-                            messageUser(sender, Messages.CANNOT_MESSAGE_YOURSELF);
+                            messageUser(sender, ServMessages.CANNOT_MESSAGE_YOURSELF);
                         else
                             messageUser(u, "<"+sender.getNickname()+">:" + command[2]);
                     } else if (content.startsWith("HELP"))
-                        messageUser(sender, Messages.CHANNEL_HELP);
+                        messageUser(sender, ServMessages.CHANNEL_HELP);
                     else if (content.startsWith("QUIT")) {
                         users.remove(sender);
                         Server.existingClients.remove(IPAddress.toString() + ":" + port);
-                        echoMessage(sender.getNickname() + Messages.USER_DISCONNECTED);
+                        echoMessage(sender.getNickname() + ServMessages.USER_DISCONNECTED);
                     } else if (content.startsWith("NAMES"))
                         messageUser(sender, listUsers());
                     else if (admin == sender) {
@@ -98,7 +101,7 @@ public class Channel extends Thread{
                         else if (content.startsWith("KICK ")) {
                             sender.setNickname(sender.getNickname().substring(1));
                             if (sender.getNickname().equals(content.split(" ")[1].trim()))
-                                messageUser(sender, Messages.CANT_KICK_YOURSELF);
+                                messageUser(sender, ServMessages.CANT_KICK_YOURSELF);
                             else
                                 kickUser(content.split(" ")[1].trim());
                             sender.setNickname("*" + sender.getNickname());
@@ -107,6 +110,70 @@ public class Channel extends Thread{
                 }
             }
         }catch(Exception e){ System.err.println(e); }
+    }
+
+    @Override
+    public int register(String ipaddress, String nickname) throws RemoteException {
+        return 0;
+    }
+
+    @Override
+    public int nick(int id, String nickname) throws RemoteException {
+        if (admin.getId() == id) {
+            return 200;
+        } else {
+            return 400;
+        }
+    }
+
+    @Override
+    public String[] list(int id) throws RemoteException {
+        return new String[0];
+    }
+
+    @Override
+    public int create(int id, String channel) throws RemoteException {
+        return 0;
+    }
+
+    @Override
+    public int remove(int id, String channel) throws RemoteException {
+        return 0;
+    }
+
+    @Override
+    public int join(int id, String channel) throws RemoteException {
+        return 0;
+    }
+
+    @Override
+    public int part(int id, String channel) throws RemoteException {
+        return 0;
+    }
+
+    @Override
+    public List<String> names(int id, String channel) throws RemoteException {
+        return null;
+    }
+
+    @Override
+    public int kick(int id, String channel, String nickname) throws RemoteException {
+        return 0;
+    }
+
+    @Override
+    public int msg(int id, String channel, String nickname, String message) throws RemoteException {
+        return 0;
+    }
+
+    @Override
+    public int message(int id, String channel, String message) throws RemoteException {
+        return 0;
+    }
+
+    @Override
+    public int quit(int id) throws RemoteException {
+        return 0;
     }
 
     private void echoMessage(String message){
@@ -141,26 +208,26 @@ public class Channel extends Thread{
             user.setNickname("*" + user.getNickname());
             c.admin = user;
         }
-        System.out.println(user.getNickname() + Messages.USER_JOINING_CHANNEL + c.getName());
-        c.messageUser(user, Messages.CHANNEL_WELCOME_MESSAGE);
+        System.out.println(user.getNickname() + ServMessages.USER_JOINING_CHANNEL + c.getName());
+        c.messageUser(user, ServMessages.CHANNEL_WELCOME_MESSAGE);
     }
 
     private void kickUser(String user){
         User kick = getUserByNick(user);
         if (kick == null)
-            messageUser(admin, Messages.USER_NOT_FOUND);
+            messageUser(admin, ServMessages.USER_NOT_FOUND);
         else {
             users.remove(kick);
             kick.setChannel(null);
-            echoMessage(kick.getNickname() + Messages.USER_KICKED);
-            messageUser(kick, Messages.YOU_GOT_KICKED);
+            echoMessage(kick.getNickname() + ServMessages.USER_KICKED);
+            messageUser(kick, ServMessages.YOU_GOT_KICKED);
             Server.partChannel(kick);
         }
     }
 
     private String listServers(){
         StringBuilder channelList = new StringBuilder();
-        channelList.append(Messages.AVAILABLE_CHANNELS);
+        channelList.append(ServMessages.AVAILABLE_CHANNELS);
         if(!Server.channels.isEmpty())
             for (Channel channel : Server.channels){
                 String channelName = "#"+ channel.getName() + " - " + channel.getUsersOnline() + " online users \n";
@@ -172,7 +239,7 @@ public class Channel extends Thread{
 
     private String listUsers(){
         StringBuilder userList = new StringBuilder();
-        userList.append(Messages.ONLINE_USERS);
+        userList.append(ServMessages.ONLINE_USERS);
         for (User user : users){
             String nick = user.getNickname() + "\n";
             userList.append(nick);
@@ -191,8 +258,8 @@ public class Channel extends Thread{
         for (User u : users) {
             if (u == user)
                 user.setNickname(user.getNickname().substring(1));
-            echoMessage(u.getNickname() + Messages.USER_DISCONNECTED);
-            messageUser(u, Messages.CHANNEL_CLOSING);
+            echoMessage(u.getNickname() + ServMessages.USER_DISCONNECTED);
+            messageUser(u, ServMessages.CHANNEL_CLOSING);
             Server.partChannel(u);
         }
         stop = true;

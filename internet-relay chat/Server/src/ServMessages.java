@@ -1,4 +1,4 @@
-public class Messages {
+public class ServMessages {
     public final static String AVAILABLE_CHANNELS = "Lista de canais disponívels: \n";
     public final static String CANT_KICK_YOURSELF = "O que você está fazendo?";
     public final static String CHANGED_NAME = " mudou o nome para ";

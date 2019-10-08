@@ -8,6 +8,7 @@ class Server extends Thread {
     private final static int PORT = 9876;
     private final static int BUFFER = 1024;
 
+
     private static DatagramSocket socket;
     private static ArrayList<User> clients;
     public static HashSet<String> existingClients;
@@ -21,7 +22,7 @@ class Server extends Thread {
     }
 
     public void run() {
-        System.out.println(Messages.SERVER_RUNNING);
+        System.out.println(ServMessages.SERVER_RUNNING);
         byte[] receiveData = new byte[BUFFER];
         while(true) {
             try{
@@ -35,11 +36,12 @@ class Server extends Thread {
                 String id = IPAddress.toString() + ":" + port;
 
                 if(!existingClients.contains(id)){
-                    echoMessage("<" +content+ ">" + Messages.LOGGED_IN);
+                    echoMessage("<" +content+ ">" + ServMessages.LOGGED_IN);
                     existingClients.add(id);
+
                     User u = new User(content, IPAddress, port);
                     clients.add(u);
-                    messageUser(u, Messages.LOGGED_IN_PM);
+                    messageUser(u, ServMessages.LOGGED_IN_PM);
                 }
                 else{
                     User sender = getUserById(IPAddress.toString(), port);
@@ -49,11 +51,11 @@ class Server extends Thread {
                         if (content.startsWith("NICK ")) {
                             String oldNick = sender.getNickname();
                             sender.setNickname(command);
-                            echoMessage(oldNick + Messages.CHANGED_NAME + sender.getNickname());
+                            echoMessage(oldNick + ServMessages.CHANGED_NAME + sender.getNickname());
                         }
                         else if (content.startsWith("CREATE "))
                             if (channelExists(command))
-                                messageUser(sender, Messages.CHANNEL_NAME_ALREADY_EXISTS);
+                                messageUser(sender, ServMessages.CHANNEL_NAME_ALREADY_EXISTS);
                             else createChannel(sender, command);
                         else if (content.startsWith("JOIN "))
                             if(channelExists(command)){
@@ -67,15 +69,15 @@ class Server extends Thread {
                     else if(content.startsWith("QUIT")){
                         clients.remove(sender);
                         existingClients.remove(id);
-                        echoMessage(sender.getNickname() + Messages.USER_DISCONNECTED);
+                        echoMessage(sender.getNickname() + ServMessages.USER_DISCONNECTED);
                     }
                     else if(content.startsWith("HELP"))
-                        messageUser(sender, Messages.LOBBY_HELP);
+                        messageUser(sender, ServMessages.LOBBY_HELP);
                     else{
-                        System.err.println(Messages.INVALID_COMMAND);
-                        messageUser(sender, Messages.INVALID_COMMAND);}
+                        System.err.println(ServMessages.INVALID_COMMAND);
+                        messageUser(sender, ServMessages.INVALID_COMMAND);}
                 }
-            }catch(Exception e) { System.err.println(Messages.INVALID_COMMAND); }
+            }catch(Exception e) { System.err.println(ServMessages.INVALID_COMMAND); }
         }
     }
 
@@ -92,9 +94,9 @@ class Server extends Thread {
             user.setChannel(c);
             channels.add(c);
             clients.remove(user);
-            echoMessage(user.getNickname() + Messages.CHANNEL_CREATED + "#" + command);
+            echoMessage(user.getNickname() + ServMessages.CHANNEL_CREATED + "#" + command);
             user.getChannel().start();
-        }catch(Exception e){messageUser(user, Messages.CHANNEL_SOCKET_ERROR);}
+        }catch(Exception e){messageUser(user, ServMessages.CHANNEL_SOCKET_ERROR);}
     }
 
     private void echoMessage(String message){
@@ -119,7 +121,7 @@ class Server extends Thread {
 
     public String listServers(){
         StringBuilder channelList = new StringBuilder();
-        channelList.append(Messages.AVAILABLE_CHANNELS);
+        channelList.append(ServMessages.AVAILABLE_CHANNELS);
         channelList.append(getName() + " - " + clients.size() + " online users \n");
         if(!channels.isEmpty())
             for (Channel channel : channels){
@@ -137,12 +139,12 @@ class Server extends Thread {
 
     public static void partChannel(User user){
         clients.add(user);
-        Server.messageUser(user, user.getNickname() + " " + Messages.PART_CHANNEL);
+        Server.messageUser(user, user.getNickname() + " " + ServMessages.PART_CHANNEL);
     }
 
     public static void main(String[] args) throws Exception{
         Server s = new Server();
-        s.setName(Messages.SERVER_NAME);
+        s.setName(ServMessages.SERVER_NAME);
         s.start();
     }
 }
