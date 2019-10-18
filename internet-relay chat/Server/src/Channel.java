@@ -1,6 +1,4 @@
 import java.net.DatagramPacket;
-import java.net.DatagramSocket;
-import java.net.InetAddress;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -9,14 +7,20 @@ public class Channel extends Thread implements ChatServerInterface{
     private final static int BUFFER = 1024;
 
     volatile boolean stop = false;
+
+    public User getAdmin() {
+        return admin;
+    }
+
     private User admin;
     private ArrayList<User> users;
-    private DatagramSocket socket;
 
-    public Channel(User admin, String name){
-        try {
-            socket = new DatagramSocket();
-        }catch(Exception e){}
+    public Channel(){
+
+    }
+
+    public Channel(User admin, String name) {
+
         admin.setNickname("*"+admin.getNickname());
         this.admin = admin;
         setName(name);
@@ -25,17 +29,13 @@ public class Channel extends Thread implements ChatServerInterface{
         messageUser(admin, ServMessages.CHANNEL_CREATE_MESSAGE + name);
     }
 
-    public void run(){
+/*    public void run(){
         byte[] receiveData = new byte[BUFFER];
         try{
             while(!stop) {
-                Arrays.fill(receiveData, (byte) 0);
-                DatagramPacket packet = new DatagramPacket(receiveData, receiveData.length);
-                socket.receive(packet);
+                *//*Arrays.fill(receiveData, (byte) 0);
 
                 String content = new String(packet.getData()).trim();
-                InetAddress IPAddress = packet.getAddress();
-                int port = packet.getPort();
 
                 User sender = getUserById(IPAddress.toString(), port);
                 if (!content.equals("")) {
@@ -72,10 +72,11 @@ public class Channel extends Thread implements ChatServerInterface{
                             sender.setNickname("*" + sender.getNickname());
                         } else echoMessage("<" + sender.getNickname() + ">: " + content);
                     } else echoMessage("<" + sender.getNickname() + ">: " + content);
-                }
+                }*//*
             }
         }catch(Exception e){ System.err.println(e); }
-    }
+    }*/
+
 
     @Override
     public int register(String ipaddress, String nickname) throws RemoteException {
@@ -117,20 +118,23 @@ public class Channel extends Thread implements ChatServerInterface{
     }
 
     @Override
-    public void remove(User user){
+    public String remove(User user){
         Server.channels.remove(user.getChannel());
         for (User u : users) {
             if (u == user)
                 user.setNickname(user.getNickname().substring(1));
             echoMessage(u.getNickname() + ServMessages.USER_DISCONNECTED);
-            messageUser(u, ServMessages.CHANNEL_CLOSING);
             Server.partChannel(u);
+            return ServMessages.CHANNEL_CLOSING;
+
         }
         stop = true;
+
+        return ServMessages.CHANNEL_HELP;
     }
 
     @Override
-    public int join(User sender, String channel) throws RemoteException {
+    public String join(User sender, String channel) throws RemoteException {
         if (Server.channelExists(channel)) {
             if(admin == sender){
                 sender.setNickname(sender.getNickname().substring(1));
@@ -138,8 +142,9 @@ public class Channel extends Thread implements ChatServerInterface{
             }
             users.remove(sender);
             Channel.inviteUser(sender, Server.getChannelByName(channel));
-        } else
-            messageUser(sender, ServMessages.CHANNEL_NOT_FOUND);
+            return ServMessages.USER_JOINING_CHANNEL;
+
+        } else return ServMessages.CHANNEL_NOT_FOUND;
     }
 
     @Override
@@ -171,8 +176,18 @@ public class Channel extends Thread implements ChatServerInterface{
     }
 
     @Override
-    public int kick(User user, String nickname) throws RemoteException {
-        return 0;
+    public String kick(User user, String nickname) throws RemoteException {
+        User kick = getUserByNick(user.getNickname());
+        if (kick == null)
+            return ServMessages.USER_NOT_FOUND;
+        else {
+            users.remove(kick);
+            kick.setChannel(null);
+            echoMessage(kick.getNickname() + ServMessages.USER_KICKED);
+
+            Server.partChannel(kick);
+            return ServMessages.YOU_GOT_KICKED;
+        }
     }
 
     @Override
@@ -188,8 +203,8 @@ public class Channel extends Thread implements ChatServerInterface{
     }
 
     @Override
-    public int message(User user, String message) throws RemoteException {
-        return 0;
+    public String message(User user, String message) throws RemoteException {
+        return message;
     }
 
     @Override
@@ -202,7 +217,7 @@ public class Channel extends Thread implements ChatServerInterface{
     private void echoMessage(String message){
         System.out.println(message);
         for (User user : users)
-            messageUser(user, message);
+            message(user, message);
 
     }
 
@@ -242,18 +257,6 @@ public class Channel extends Thread implements ChatServerInterface{
         c.messageUser(user, ServMessages.CHANNEL_WELCOME_MESSAGE);
     }
 
-    private void kickUser(String user){
-        User kick = getUserByNick(user);
-        if (kick == null)
-            messageUser(admin, ServMessages.USER_NOT_FOUND);
-        else {
-            users.remove(kick);
-            kick.setChannel(null);
-            echoMessage(kick.getNickname() + ServMessages.USER_KICKED);
-            messageUser(kick, ServMessages.YOU_GOT_KICKED);
-            Server.partChannel(kick);
-        }
-    }
 
 
     private void messageUser(User user, String message){
