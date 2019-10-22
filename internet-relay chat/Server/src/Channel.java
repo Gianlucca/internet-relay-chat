@@ -26,7 +26,7 @@ public class Channel extends Thread implements ChatServerInterface{
         setName(name);
         users = new ArrayList<>();
         users.add(admin);
-        messageUser(admin, ServMessages.CHANNEL_CREATE_MESSAGE + name);
+        //messageUser(admin, ServMessages.CHANNEL_CREATE_MESSAGE + name);
     }
 
 /*    public void run(){
@@ -79,12 +79,14 @@ public class Channel extends Thread implements ChatServerInterface{
 
 
     @Override
-    public int register(String ipaddress, String nickname) throws RemoteException {
-        return 0;
+    public String register(User user) throws RemoteException {
+        Server.existingClients.add(user.getId());
+
+        return ServMessages.LOGGED_IN_PM + " " + user.getId();
     }
 
     @Override
-    public void nick(User sender, String nickname) throws RemoteException {
+    public String nick(User sender, String nickname) throws RemoteException {
         if (admin.getId() == sender.getId()) {
             String oldNick = sender.getNickname();
             sender.setNickname("*" + nickname);
@@ -95,6 +97,8 @@ public class Channel extends Thread implements ChatServerInterface{
             sender.setNickname(nickname);
             echoMessage(oldNick + ServMessages.CHANGED_NAME + sender.getNickname());
         }
+
+        return ServMessages.CHANGED_NAME;
     }
 
     @Override
@@ -113,23 +117,22 @@ public class Channel extends Thread implements ChatServerInterface{
     }
 
     @Override
-    public int create(User user) throws RemoteException {
-        return 0;
+    public String create(User user, String command) throws RemoteException {
+        return Server.createChannel(user, command);
     }
 
     @Override
-    public String remove(User user){
+    public String remove(User user) throws RemoteException {
         Server.channels.remove(user.getChannel());
         for (User u : users) {
             if (u == user)
                 user.setNickname(user.getNickname().substring(1));
-            echoMessage(u.getNickname() + ServMessages.USER_DISCONNECTED);
-            Server.partChannel(u);
-            return ServMessages.CHANNEL_CLOSING;
+                echoMessage(u.getNickname() + ServMessages.USER_DISCONNECTED);
+                Server.partChannel(u);
+                return ServMessages.CHANNEL_CLOSING;
 
         }
         stop = true;
-
         return ServMessages.CHANNEL_HELP;
     }
 
@@ -141,14 +144,13 @@ public class Channel extends Thread implements ChatServerInterface{
                 admin = sender;
             }
             users.remove(sender);
-            Channel.inviteUser(sender, Server.getChannelByName(channel));
             return ServMessages.USER_JOINING_CHANNEL;
 
         } else return ServMessages.CHANNEL_NOT_FOUND;
     }
 
     @Override
-    public void part(User sender) throws RemoteException {
+    public String part(User sender) throws RemoteException {
         users.remove(sender);
         if (admin == sender){
             sender.setNickname(sender.getNickname().substring(1));
@@ -157,6 +159,8 @@ public class Channel extends Thread implements ChatServerInterface{
         sender.setChannel(null);
         echoMessage(sender.getNickname() + ServMessages.USER_DISCONNECTED);
         Server.partChannel(sender);
+
+        return ServMessages.USER_DISCONNECTED;
 
 
     }
@@ -183,7 +187,7 @@ public class Channel extends Thread implements ChatServerInterface{
         else {
             users.remove(kick);
             kick.setChannel(null);
-            echoMessage(kick.getNickname() + ServMessages.USER_KICKED);
+            //echoMessage(kick.getNickname() + ServMessages.USER_KICKED);
 
             Server.partChannel(kick);
             return ServMessages.YOU_GOT_KICKED;
@@ -195,11 +199,11 @@ public class Channel extends Thread implements ChatServerInterface{
         String[] command = message.split(" ",3);
         User u = getUserByNick(command[1]);
         if(u == null)
-            messageUser(user, ServMessages.USER_NOT_FOUND);
+            message(user, ServMessages.USER_NOT_FOUND);
         else if (u == user)
-            messageUser(user, ServMessages.CANNOT_MESSAGE_YOURSELF);
+            message(user, ServMessages.CANNOT_MESSAGE_YOURSELF);
         else
-            messageUser(u, "<"+user.getNickname()+">:" + command[2]);
+            message(u, "<"+user.getNickname()+">:" + command[2]);
     }
 
     @Override
@@ -208,25 +212,26 @@ public class Channel extends Thread implements ChatServerInterface{
     }
 
     @Override
-    public int quit(User user) throws RemoteException {
+    public void quit(User user) throws RemoteException {
         users.remove(user);
-        Server.existingClients.remove(user.getIPAddress().toString() + ":" + user.getPort());
-        echoMessage(user.getNickname() + ServMessages.USER_DISCONNECTED);
+        Server.existingClients.remove(user.getId());
+       // echoMessage(user.getNickname() + ServMessages.USER_DISCONNECTED);
+
     }
 
     private void echoMessage(String message){
         System.out.println(message);
         for (User user : users)
-            message(user, message);
+            ;
 
     }
 
-    private User getUserById(String ip, int port) {
+/*    private User getUserById(String ip, int port) {
         for (User user : users)
             if (user.getIPAddress().toString().equals(ip) && user.getPort() == port)
                 return user;
         return null;
-    }
+    }*/
 
     private User getUserById(int id) {
         for (User user : users)
@@ -246,24 +251,6 @@ public class Channel extends Thread implements ChatServerInterface{
         return users.size();
     }
 
-    public static void inviteUser(User user, Channel c){
-        user.setChannel(c);
-        c.users.add(user);
-        if(c.admin == user){
-            user.setNickname("*" + user.getNickname());
-            c.admin = user;
-        }
-        System.out.println(user.getNickname() + ServMessages.USER_JOINING_CHANNEL + c.getName());
-        c.messageUser(user, ServMessages.CHANNEL_WELCOME_MESSAGE);
-    }
-
-
-
-    private void messageUser(User user, String message){
-        byte[] data = message.getBytes();
-        try{ socket.send(new DatagramPacket(data, data.length, user.getIPAddress(), user.getPort()));}
-        catch (Exception e){ }
-    }
 
 
 }
