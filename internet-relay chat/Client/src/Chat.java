@@ -1,6 +1,12 @@
+import java.rmi.Remote;
 import java.rmi.RemoteException;
+import java.rmi.server.UnicastRemoteObject;
 
-public class Chat implements ChatClientInterface {
+public class Chat extends UnicastRemoteObject implements ChatClientInterface {
+
+    protected Chat() throws RemoteException {
+    }
+
     @Override
     public String message(String message) throws RemoteException {
         return message;

@@ -1,8 +1,9 @@
-import java.net.DatagramPacket;
+import java.net.MalformedURLException;
+import java.rmi.Naming;
+import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
-import java.util.Arrays;
 
 public class Channel extends UnicastRemoteObject implements ChatServerInterface{
     private final static int BUFFER = 1024;
@@ -12,6 +13,7 @@ public class Channel extends UnicastRemoteObject implements ChatServerInterface{
     public User getAdmin() {
         return admin;
     }
+
 
     private User admin;
     private ArrayList<User> users;
@@ -29,87 +31,51 @@ public class Channel extends UnicastRemoteObject implements ChatServerInterface{
         //messageUser(admin, ServMessages.CHANNEL_CREATE_MESSAGE + name);
     }
 
-/*    public void run(){
-        byte[] receiveData = new byte[BUFFER];
-        try{
-            while(!stop) {
-                *//*Arrays.fill(receiveData, (byte) 0);
-
-                String content = new String(packet.getData()).trim();
-
-                User sender = getUserById(IPAddress.toString(), port);
-                if (!content.equals("")) {
-                    if (content.startsWith("NICK ") || content.startsWith("JOIN")) {
-                        String command = content.split(" ")[1].trim();
-                        if (content.startsWith("NICK ")) {
-                            nick(sender, command);
-                        } else if (content.startsWith("JOIN")) {
-                            join(sender, command);
-                        }
-                    } else if (content.startsWith("LIST"))
-                        messageUser(sender, list(sender).toString());
-                    else if (content.startsWith("PART")) {
-                        part(sender);
-                    } else if (content.startsWith("MSG")) {
-                        msg(sender, content);
-                    } else if (content.startsWith("HELP"))
-                        messageUser(sender, ServMessages.CHANNEL_HELP);
-                    else if (content.startsWith("QUIT")) {
-                        quit(sender);
-                    } else if (content.startsWith("NAMES"))
-                        messageUser(sender, names(sender).toString());
-                    else if (admin == sender) {
-                        if (!sender.getNickname().substring(0, 1).equals("*"))
-                            sender.setNickname("*" + admin.getNickname());
-                        if (content.startsWith("REMOVE"))
-                            remove(sender);
-                        else if (content.startsWith("KICK ")) {
-                            sender.setNickname(sender.getNickname().substring(1));
-                            if (sender.getNickname().equals(content.split(" ")[1].trim()))
-                                messageUser(sender, ServMessages.CANT_KICK_YOURSELF);
-                            else
-                                kickUser(content.split(" ")[1].trim());
-                            sender.setNickname("*" + sender.getNickname());
-                        } else echoMessage("<" + sender.getNickname() + ">: " + content);
-                    } else echoMessage("<" + sender.getNickname() + ">: " + content);
-                }*//*
-            }
-        }catch(Exception e){ System.err.println(e); }
-    }*/
-
 
     @Override
-    public String register(int user) throws RemoteException {
-        Server.existingClients.add(user);
+    public int register(String nickname) throws RemoteException {
+        try {
+            int uniqueIdClient = Server.getId();
+            ChatClientInterface nextClient = (ChatClientInterface) Naming.lookup("//localhost:1099/Client");
+            Server.clientsAcess.put(uniqueIdClient, new User(uniqueIdClient, nickname, nextClient));
 
-        return ServMessages.LOGGED_IN_PM + " " + user;
+            return uniqueIdClient;
+
+        } catch (NotBoundException e) {
+            e.printStackTrace();
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        }
+
+        return 0;
+
     }
 
     @Override
-    public String nick(User sender, String nickname) throws RemoteException {
-        if (admin.getId() == sender.getId()) {
-            String oldNick = sender.getNickname();
-            sender.setNickname("*" + nickname);
-            admin = sender;
-            echoMessage(oldNick + ServMessages.CHANGED_NAME + sender.getNickname());
+    public String nick(int user, String nickname) throws RemoteException {
+        User userWhoRequested = Server.clientsAcess.get(user);
+        if (admin.getId() == user) {
+            String oldNick = userWhoRequested.getNickname();
+            userWhoRequested.setNickname("*" + nickname);
+            admin = userWhoRequested;
+            echoMessage(userWhoRequested.getChannel(), oldNick + ServMessages.CHANGED_NAME + userWhoRequested.getNickname());
         } else {
-            String oldNick = sender.getNickname();
-            sender.setNickname(nickname);
-            echoMessage(oldNick + ServMessages.CHANGED_NAME + sender.getNickname());
+            String oldNick = userWhoRequested.getNickname();
+            userWhoRequested.setNickname(nickname);
+            echoMessage(userWhoRequested.getChannel(),oldNick + ServMessages.CHANGED_NAME + userWhoRequested.getNickname());
         }
 
         return ServMessages.CHANGED_NAME;
     }
 
     @Override
-    public String[] list(User user) throws RemoteException {
-        String[] channelList = new String[100];
-        channelList[0] = (ServMessages.AVAILABLE_CHANNELS);
+    public String list() throws RemoteException {
+        String channelList = (ServMessages.AVAILABLE_CHANNELS);
         int i = 1;
         if(!Server.channels.isEmpty())
             for (Channel channel : Server.channels){
-                String channelName = "#"+ i +  channel.getUsersOnline() + " online users \n";
-                channelList[i] = (channelName);
+                String channelName = "#"+ i + " - " +  channel.getName() + "\n";
+                channelList += (channelName);
                 i++;
             }
 
@@ -117,17 +83,18 @@ public class Channel extends UnicastRemoteObject implements ChatServerInterface{
     }
 
     @Override
-    public String create(User user, String command) throws RemoteException {
-        return Server.createChannel(user, command);
+    public String create(int user, String command) throws RemoteException {
+        return Server.createChannel(Server.clientsAcess.get(user), command);
     }
 
     @Override
-    public String remove(User user) throws RemoteException {
-        Server.channels.remove(user.getChannel());
+    public String remove(int user) throws RemoteException {
+        User userWhoRequested = Server.clientsAcess.get(user);
+        Server.channels.remove(userWhoRequested);
         for (User u : users) {
-            if (u == user)
-                user.setNickname(user.getNickname().substring(1));
-            echoMessage(u.getNickname() + ServMessages.USER_DISCONNECTED);
+            if (u == userWhoRequested)
+                userWhoRequested.setNickname(userWhoRequested.getNickname().substring(1));
+            echoMessage(userWhoRequested.getChannel(),u.getNickname() + ServMessages.USER_DISCONNECTED);
             Server.partChannel(u);
             return ServMessages.CHANNEL_CLOSING;
 
@@ -137,57 +104,64 @@ public class Channel extends UnicastRemoteObject implements ChatServerInterface{
     }
 
     @Override
-    public String join(User sender, String channel) throws RemoteException {
+    public String join(int user, String channel) throws RemoteException {
         if (Server.channelExists(channel)) {
-            if(admin == sender){
-                sender.setNickname(sender.getNickname().substring(1));
-                admin = sender;
+            User userWhoRequested = Server.clientsAcess.get(user);
+            if(admin == userWhoRequested){
+                userWhoRequested.setNickname(userWhoRequested.getNickname().substring(1));
+                admin = userWhoRequested;
             }
-            users.remove(sender);
+            users.remove(userWhoRequested);
             return ServMessages.USER_JOINING_CHANNEL;
 
         } else return ServMessages.CHANNEL_NOT_FOUND;
     }
 
     @Override
-    public String part(User sender) throws RemoteException {
-        users.remove(sender);
-        if (admin == sender){
-            sender.setNickname(sender.getNickname().substring(1));
-            admin = sender;
+    public String part(int user, String channel) throws RemoteException {
+        if (Server.getChannelByName(channel)!= null) {
+            Channel ch = Server.getChannelByName(channel);
+            User userWhoRequested = Server.clientsAcess.get(user);
+            ch.users.remove(userWhoRequested);
+            if (ch.admin == userWhoRequested) {
+                userWhoRequested.setNickname(userWhoRequested.getNickname().substring(1));
+                ch.admin = userWhoRequested;
+            }
+            userWhoRequested.setChannel(null);
+            echoMessage(userWhoRequested.getChannel(), userWhoRequested.getNickname() + ServMessages.USER_DISCONNECTED);
+            Server.partChannel(userWhoRequested);
+
+            return ServMessages.USER_DISCONNECTED;
         }
-        sender.setChannel(null);
-        echoMessage(sender.getNickname() + ServMessages.USER_DISCONNECTED);
-        Server.partChannel(sender);
 
-        return ServMessages.USER_DISCONNECTED;
-
-
+        return ServMessages.CHANNEL_NOT_FOUND;
     }
 
     @Override
-    public String[] names(User userU) throws RemoteException {
-        String[] userList = new String[100];
+    public String names(int user) throws RemoteException {
+        User userWhoRequested = Server.clientsAcess.get(user);
 
-        userList[0] = (ServMessages.ONLINE_USERS);
+        String userList = (ServMessages.ONLINE_USERS);
         int i = 1;
-        for (User user : users){
-            String nick = user.getNickname() + "\n";
-            userList[i] = (nick);
+        for (User u : userWhoRequested.getChannel().users){
+            String nick = u.getNickname() + "\n";
+            userList+= (nick);
             i++;
         }
         return userList;
     }
 
     @Override
-    public String kick(User user, String nickname) throws RemoteException {
-        User kick = getUserByNick(user.getNickname());
+    public String kick(int user, String nickname) throws RemoteException {
+        User userWhoRequested = Server.clientsAcess.get(user);
+        User kick = getUserByNick(userWhoRequested.getNickname());
         if (kick == null)
             return ServMessages.USER_NOT_FOUND;
         else {
-            users.remove(kick);
+            Channel ch = userWhoRequested.getChannel();
+            ch.users.remove(kick);
             kick.setChannel(null);
-            //echoMessage(kick.getNickname() + ServMessages.USER_KICKED);
+            echoMessage(ch, kick.getNickname() + ServMessages.USER_KICKED);
 
             Server.partChannel(kick);
             return ServMessages.YOU_GOT_KICKED;
@@ -195,43 +169,42 @@ public class Channel extends UnicastRemoteObject implements ChatServerInterface{
     }
 
     @Override
-    public void msg(User user, String message) throws RemoteException {
+    public String msg(int user, String nickname, String message) throws RemoteException {
         String[] command = message.split(" ",3);
         User u = getUserByNick(command[1]);
+        User userWhoRequested = Server.clientsAcess.get(user);
         if(u == null)
-            message(user, ServMessages.USER_NOT_FOUND);
-        else if (u == user)
-            message(user, ServMessages.CANNOT_MESSAGE_YOURSELF);
-        else
-            message(u, "<"+user.getNickname()+">:" + command[2]);
+            return ServMessages.USER_NOT_FOUND;
+        else if (u == userWhoRequested)
+            return ServMessages.CANNOT_MESSAGE_YOURSELF;
+        else {
+            String msgem = "<" + userWhoRequested.getNickname() + ">:" + command[2];
+            u.getRemoteAcessForServer().message(msgem);
+            return msgem;
+        }
     }
 
     @Override
-    public String message(User user, String message) throws RemoteException {
-        return message;
+    public void message(int user, String message) throws RemoteException {
+        User userWhoRequested = Server.clientsAcess.get(user);
+
+        echoMessage(userWhoRequested.getChannel(), message);
     }
 
     @Override
-    public void quit(User user) throws RemoteException {
-        users.remove(user);
-        Server.existingClients.remove(user.getId());
-        // echoMessage(user.getNickname() + ServMessages.USER_DISCONNECTED);
+    public void quit(int user) throws RemoteException {
+        User userWhoRequested = Server.clientsAcess.get(user);
+        userWhoRequested.getChannel().users.remove(userWhoRequested);
+        Server.clientsAcess.remove(user);
+        echoMessage(userWhoRequested.getChannel(), userWhoRequested.getNickname() + ServMessages.USER_DISCONNECTED);
 
     }
 
-    private void echoMessage(String message){
-        System.out.println(message);
-        for (User user : users)
-            ;
+    private void echoMessage(Channel channel, String message) throws RemoteException {
+        for (User user : channel.users)
+            user.getRemoteAcessForServer().message(message);
 
     }
-
-/*    private User getUserById(String ip, int port) {
-        for (User user : users)
-            if (user.getIPAddress().toString().equals(ip) && user.getPort() == port)
-                return user;
-        return null;
-    }*/
 
     private User getUserById(int id) {
         for (User user : users)

@@ -21,6 +21,7 @@ public class ServMessages {
     public final static String USER_DISCONNECTED = " saiu.";
     public final static String USER_JOINING_CHANNEL = " entrou no canal ";
     public final static String USER_KICKED = " foi removido pelo administrador.";
+    public final static String NICKNAME_ALREADY_IN_USE = "Este nickname já está sendo usado!";
     public final static String USER_NOT_FOUND = "O usuário não existe";
     public final static String YOU_GOT_KICKED = "Você foi removido pelo administrador.";
     public final static String CANNOT_MESSAGE_YOURSELF = "Você não pode mandar mensagem pra si mesmo!";

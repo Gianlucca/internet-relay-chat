@@ -4,18 +4,23 @@ public class User {
     private String nickname;
     private Channel channel;
     private int userId;
-    private static int id = 0;
 
-    public User(String nickname){
+
+
+    private ChatClientInterface remoteAcessForServer;
+
+    public User(int id, String nickname, ChatClientInterface remoteAcessForServer){
         this.nickname = nickname;
         this.userId= id;
-        id++;
+        this.remoteAcessForServer = remoteAcessForServer;
+
     }
 
-    public int getId() { return id; }
-
-    public void setId(int id) {this.id = id;
+    public ChatClientInterface getRemoteAcessForServer() {
+        return remoteAcessForServer;
     }
+
+    public int getId() { return userId; }
 
     public String getNickname() {
         return nickname;
