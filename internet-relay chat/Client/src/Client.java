@@ -8,15 +8,17 @@ class Client {
     public static User user;
 
     public static void main(String args[]) throws Exception{
-        ChatServerInterface chatServerInterface = (ChatServerInterface) Naming.lookup("//local/Channel");
+        ChatServerInterface chatServerInterface = (ChatServerInterface) Naming.lookup("//10.32.162.61:1099/Server");
         BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
         do {
             try {
                 System.out.println(Messages.INSERT_USERNAME);
                 String sentence = in.readLine().trim();
                 if(!sentence.contains("*") && !sentence.contains(" ") && sentence.length() > 0) {
-                    chatServerInterface.register(user);
                     user = new User(sentence);
+                    Client.connected = true;
+                    chatServerInterface.register(user.getId());
+
                 }
                 else  System.err.println(Messages.SET_NICKNAME_ERROR);
 //                Thread.sleep(1000);

@@ -100,6 +100,8 @@ class Server {
 
     }
 
+
+
     public static boolean channelExists(String channel){
         for (Channel c : channels)
             if (c.getName().equals(channel))
@@ -148,7 +150,6 @@ class Server {
             user.setChannel(c);
             channels.add(c);
             clients.remove(user);
-            user.getChannel().start();
             return ServMessages.CHANNEL_CREATED;
         }catch(Exception e){ return ServMessages.CHANNEL_NOT_FOUND; }
     }

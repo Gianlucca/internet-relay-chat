@@ -1,9 +1,10 @@
 import java.net.DatagramPacket;
 import java.rmi.RemoteException;
+import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-public class Channel extends Thread implements ChatServerInterface{
+public class Channel extends UnicastRemoteObject implements ChatServerInterface{
     private final static int BUFFER = 1024;
 
     volatile boolean stop = false;
@@ -14,16 +15,15 @@ public class Channel extends Thread implements ChatServerInterface{
 
     private User admin;
     private ArrayList<User> users;
-
-    public Channel(){
+    private String name;
+    public Channel() throws RemoteException{
 
     }
 
-    public Channel(User admin, String name) {
-
+    public Channel(User admin, String name) throws RemoteException {
         admin.setNickname("*"+admin.getNickname());
         this.admin = admin;
-        setName(name);
+        this.name = name;
         users = new ArrayList<>();
         users.add(admin);
         //messageUser(admin, ServMessages.CHANNEL_CREATE_MESSAGE + name);
@@ -79,10 +79,10 @@ public class Channel extends Thread implements ChatServerInterface{
 
 
     @Override
-    public String register(User user) throws RemoteException {
-        Server.existingClients.add(user.getId());
+    public String register(int user) throws RemoteException {
+        Server.existingClients.add(user);
 
-        return ServMessages.LOGGED_IN_PM + " " + user.getId();
+        return ServMessages.LOGGED_IN_PM + " " + user;
     }
 
     @Override
@@ -108,7 +108,7 @@ public class Channel extends Thread implements ChatServerInterface{
         int i = 1;
         if(!Server.channels.isEmpty())
             for (Channel channel : Server.channels){
-                String channelName = "#"+ channel.getName() + " - " + channel.getUsersOnline() + " online users \n";
+                String channelName = "#"+ i +  channel.getUsersOnline() + " online users \n";
                 channelList[i] = (channelName);
                 i++;
             }
@@ -127,9 +127,9 @@ public class Channel extends Thread implements ChatServerInterface{
         for (User u : users) {
             if (u == user)
                 user.setNickname(user.getNickname().substring(1));
-                echoMessage(u.getNickname() + ServMessages.USER_DISCONNECTED);
-                Server.partChannel(u);
-                return ServMessages.CHANNEL_CLOSING;
+            echoMessage(u.getNickname() + ServMessages.USER_DISCONNECTED);
+            Server.partChannel(u);
+            return ServMessages.CHANNEL_CLOSING;
 
         }
         stop = true;
@@ -215,7 +215,7 @@ public class Channel extends Thread implements ChatServerInterface{
     public void quit(User user) throws RemoteException {
         users.remove(user);
         Server.existingClients.remove(user.getId());
-       // echoMessage(user.getNickname() + ServMessages.USER_DISCONNECTED);
+        // echoMessage(user.getNickname() + ServMessages.USER_DISCONNECTED);
 
     }
 
@@ -252,5 +252,7 @@ public class Channel extends Thread implements ChatServerInterface{
     }
 
 
-
+    public String getName() {
+        return name;
+    }
 }
