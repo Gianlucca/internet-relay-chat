@@ -104,14 +104,16 @@ public class Channel extends UnicastRemoteObject implements ChatServerInterface{
     }
 
     @Override
-    public String join(int user, String channel) throws RemoteException {
+   public String join(int user, String channel) throws RemoteException {
         if (Server.channelExists(channel)) {
             User userWhoRequested = Server.clientsAcess.get(user);
-            if(admin == userWhoRequested){
+            Channel ch = Server.getChannelByName(channel);
+            if(ch.admin == userWhoRequested){
                 userWhoRequested.setNickname(userWhoRequested.getNickname().substring(1));
-                admin = userWhoRequested;
+                ch.admin = userWhoRequested;
             }
-            users.remove(userWhoRequested);
+
+            ch.users.remove(userWhoRequested);
             return ServMessages.USER_JOINING_CHANNEL;
 
         } else return ServMessages.CHANNEL_NOT_FOUND;
