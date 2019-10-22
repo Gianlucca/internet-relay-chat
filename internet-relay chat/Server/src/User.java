@@ -2,23 +2,19 @@ import java.net.InetAddress;
 
 public class User {
     private String nickname;
-    private InetAddress IPAddress;
-    private int port;
     private Channel channel;
+    private int userId;
+    private static int id = 0;
 
-    public User(String nickname, InetAddress IPAddress, int port){
-        this.IPAddress = IPAddress;
+    public User(String nickname){
         this.nickname = nickname;
-        this.port = port;
+        this.userId= id;
+        id++;
     }
 
+    public int getId() { return id; }
 
-    public InetAddress getIPAddress() {
-        return IPAddress;
-    }
-
-    public int getPort() {
-        return port;
+    public void setId(int id) {this.id = id;
     }
 
     public String getNickname() {
