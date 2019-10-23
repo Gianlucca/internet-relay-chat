@@ -27,4 +27,5 @@ public class ServMessages {
     public final static String CANNOT_MESSAGE_YOURSELF = "Você não pode mandar mensagem pra si mesmo!";
     public final static String CHANNEL_REMOVED = "Canal removido";
     public final static String CHANNEL_CANNOT_BE_REMOVED = "Canal nao removido";
+    public final static String MSG_SENT = "Mensagem enviada";
 }
