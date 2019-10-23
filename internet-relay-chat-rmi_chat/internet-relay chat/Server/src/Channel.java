@@ -177,7 +177,7 @@ public class Channel extends UnicastRemoteObject implements ChatServerInterface{
             ch.users.remove(kick);
             kick.setChannel(null);
             echoMessage(ch, kick.getNickname() + ServMessages.USER_KICKED);
-            Server.lobbyClients.add(userWhoRequested);
+            Server.lobbyClients.add(kick);
             Server.partChannel(kick);
             return ServMessages.YOU_GOT_KICKED;
         }
@@ -193,9 +193,9 @@ public class Channel extends UnicastRemoteObject implements ChatServerInterface{
         else if (u == userWhoRequested)
             return ServMessages.CANNOT_MESSAGE_YOURSELF;
         else {
-            String msgem = "<" + userWhoRequested.getNickname() + ">:" + command[2];
-            u.getRemoteAcessForServer().message(msgem);
-            return msgem;
+           // String msgem = "<" + userWhoRequested.getNickname() + ">:" + command[2];
+            u.getRemoteAcessForServer().message("<" + userWhoRequested.getNickname(),">:" + command[2]);
+            return ServMessages.MSG_SENT;
         }
     }
 
@@ -205,7 +205,7 @@ public class Channel extends UnicastRemoteObject implements ChatServerInterface{
         Channel ch = userWhoRequested.getChannel();
         for (User u : ch.users) {
             if(u != userWhoRequested)
-                u.getRemoteAcessForServer().message(message);
+                u.getRemoteAcessForServer().message(userWhoRequested.getNickname(),message);
         }
     }
 
@@ -219,8 +219,8 @@ public class Channel extends UnicastRemoteObject implements ChatServerInterface{
     }
 
     private void echoMessage(Channel channel, String message) throws RemoteException {
-        for (User user : channel.users)
-            user.getRemoteAcessForServer().message(message);
+    //    for (User user : channel.users)
+          //  user.getRemoteAcessForServer().message(message);
 
     }
 
