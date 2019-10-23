@@ -33,10 +33,10 @@ public class Channel extends UnicastRemoteObject implements ChatServerInterface{
 
 
     @Override
-    public int register(String nickname) throws RemoteException {
+    public int register(String nickname,String args) throws RemoteException {
         try {
             int uniqueIdClient = Server.getId();
-            ChatClientInterface nextClient = (ChatClientInterface) Naming.lookup("//localhost:1099/Client");
+            ChatClientInterface nextClient = (ChatClientInterface) Naming.lookup("//"+ args + "/Client");
             Server.clientsAcess.put(uniqueIdClient, new User(uniqueIdClient, nickname, nextClient));
 
             return uniqueIdClient;

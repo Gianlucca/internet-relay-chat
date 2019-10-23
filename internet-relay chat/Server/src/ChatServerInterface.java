@@ -2,7 +2,7 @@ import java.rmi.Remote;
 import java.rmi.RemoteException;
 
 public interface ChatServerInterface extends Remote {
-    public int register(String nickname) throws RemoteException;
+    public int register(String nickname, String args) throws RemoteException;
     public String nick(int user, String nickname) throws RemoteException;
     public String list() throws RemoteException;
     public String create(int user, String command) throws RemoteException;

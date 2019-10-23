@@ -1,6 +1,7 @@
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.rmi.Naming;
+import java.rmi.registry.LocateRegistry;
 
 class Client {
     public static int BUFFER_SIZE = 1024;
@@ -8,10 +9,15 @@ class Client {
     public static int userId;
 
     public static void main(String args[]) throws Exception{
-        java.rmi.registry.LocateRegistry.createRegistry(1065);
+        LocateRegistry.createRegistry(1065);
         Naming.rebind("Client", new Chat());
 
-        ChatServerInterface chatServerInterface = (ChatServerInterface) Naming.lookup("//localhost:1099/Server");
+        if (args.length == 0 || args.length >= 2) {
+            System.out.println("Digite um argumento válido!"
+                    + " \n ip do servidor - para conectar em um determinado servidor.");
+
+        }
+        ChatServerInterface chatServerInterface = (ChatServerInterface) Naming.lookup("//"+args[0]+"/Server");
         BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
         do {
             try {
@@ -19,7 +25,7 @@ class Client {
                 String sentence = in.readLine().trim();
                 if(!sentence.contains("*") && !sentence.contains(" ") && sentence.length() > 0) {
                     Client.connected = true;
-                    userId = chatServerInterface.register(sentence);
+                    userId = chatServerInterface.register(sentence,args[0]);
                 }
                 else  System.err.println(Messages.SET_NICKNAME_ERROR);
 
