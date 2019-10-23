@@ -9,6 +9,7 @@ public class Chat extends UnicastRemoteObject implements ChatClientInterface {
 
     @Override
     public String message(String message) throws RemoteException {
+        System.out.println(message);
         return message;
 
     }

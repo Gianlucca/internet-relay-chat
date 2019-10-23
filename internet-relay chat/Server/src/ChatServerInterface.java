@@ -6,7 +6,7 @@ public interface ChatServerInterface extends Remote {
     public String nick(int user, String nickname) throws RemoteException;
     public String list() throws RemoteException;
     public String create(int user, String command) throws RemoteException;
-    public String remove(int user) throws RemoteException;
+    public String remove(int user,String channel) throws RemoteException;
     public String join(int user, String channel) throws RemoteException;
     public String part(int user, String channel) throws RemoteException;
     public String names(int user) throws RemoteException;

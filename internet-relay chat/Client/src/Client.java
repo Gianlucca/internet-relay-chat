@@ -14,7 +14,7 @@ class Client {
 
         if (args.length == 0 || args.length >= 2) {
             System.out.println("Digite um argumento válido!"
-                    + " \n ip do servidor - para conectar em um determinado servidor.");
+                    + " \n seu ip - para conectar em um determinado servidor.");
 
         }
         ChatServerInterface chatServerInterface = (ChatServerInterface) Naming.lookup("//"+args[0]+"/Server");
@@ -72,8 +72,8 @@ class Client {
                         else if(newSentence.toLowerCase().startsWith("/names")){
                             System.out.println(chatServerInterface.names(userId));
                         }else if(newSentence.toLowerCase().startsWith("/remove")){
-                            newSentence = newSentence.replaceFirst("/", "").toUpperCase().substring(0, 6);
-                            chatServerInterface.message(userId, newSentence);
+                            String[] command = newSentence.split(" ", 3);
+                            chatServerInterface.remove(userId, command[1]);
                         }
                         else if(newSentence.toLowerCase().startsWith("/msg")){
                             String[] command = newSentence.split(" ", 3);

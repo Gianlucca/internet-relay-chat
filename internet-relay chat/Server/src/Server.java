@@ -10,6 +10,7 @@ class Server {
     private final static int BUFFER = 1024;
     private static int id = 0;
 
+    public static ArrayList<User> lobbyClients;
     public static HashMap<Integer, User> clientsAcess;
     public static HashSet<Integer> existingClients;
     public static ArrayList<Channel> channels;
@@ -18,6 +19,7 @@ class Server {
         clientsAcess = new HashMap<>();
         existingClients = new HashSet<>();
         channels = new ArrayList<>();
+        lobbyClients = new ArrayList<>();
     }
 
     public static void main(String[] args) throws Exception{
@@ -72,6 +74,7 @@ class Server {
     public static String createChannel(User user, String command){
         try {
             Channel c = new Channel(user, command);
+            Server.lobbyClients.remove(user);
             user.setChannel(c);
             channels.add(c);
             return ServMessages.CHANNEL_CREATED;

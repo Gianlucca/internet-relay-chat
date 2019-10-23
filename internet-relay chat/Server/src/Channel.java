@@ -37,8 +37,9 @@ public class Channel extends UnicastRemoteObject implements ChatServerInterface{
         try {
             int uniqueIdClient = Server.getId();
             ChatClientInterface nextClient = (ChatClientInterface) Naming.lookup("//"+ args + "/Client");
-            Server.clientsAcess.put(uniqueIdClient, new User(uniqueIdClient, nickname, nextClient));
-
+            User u = new User(uniqueIdClient, nickname, nextClient);
+            Server.clientsAcess.put(uniqueIdClient, u);
+            Server.lobbyClients.add(u);
             return uniqueIdClient;
 
         } catch (NotBoundException e) {
@@ -88,18 +89,21 @@ public class Channel extends UnicastRemoteObject implements ChatServerInterface{
     }
 
     @Override
-    public String remove(int user) throws RemoteException {
+    public String remove(int user, String channel) throws RemoteException {
         User userWhoRequested = Server.clientsAcess.get(user);
-        Server.channels.remove(userWhoRequested);
-        for (User u : users) {
-            if (u == userWhoRequested)
-                userWhoRequested.setNickname(userWhoRequested.getNickname().substring(1));
-            echoMessage(userWhoRequested.getChannel(),u.getNickname() + ServMessages.USER_DISCONNECTED);
-            Server.partChannel(u);
-            return ServMessages.CHANNEL_CLOSING;
+        Channel ch = userWhoRequested.getChannel();
 
+        if(ch.admin == userWhoRequested){
+            Server.channels.remove(ch);
+            for (User u : ch.users) {
+                if (u == userWhoRequested)
+                    userWhoRequested.setNickname(userWhoRequested.getNickname().substring(1));
+                Server.partChannel(u);
+            }
+
+            return ServMessages.CHANNEL_CLOSING;
         }
-        stop = true;
+
         return ServMessages.CHANNEL_HELP;
     }
 
@@ -108,20 +112,27 @@ public class Channel extends UnicastRemoteObject implements ChatServerInterface{
         if (Server.channelExists(channel)) {
             User userWhoRequested = Server.clientsAcess.get(user);
             Channel ch = Server.getChannelByName(channel);
-            if(ch.admin == userWhoRequested){
-                userWhoRequested.setNickname(userWhoRequested.getNickname().substring(1));
-                ch.admin = userWhoRequested;
-            }
+            if(!ch.users.contains(userWhoRequested)){
+                if(ch.admin == userWhoRequested){
+                    userWhoRequested.setNickname(userWhoRequested.getNickname().substring(1));
+                    ch.admin = userWhoRequested;
+                }
 
-            ch.users.remove(userWhoRequested);
-            return ServMessages.USER_JOINING_CHANNEL;
+                Server.lobbyClients.remove(userWhoRequested);
+                ch.users.add(userWhoRequested);
+                userWhoRequested.setChannel(ch);
+                return ServMessages.USER_JOINING_CHANNEL;
+
+
+            }else  return ServMessages.INVALID_COMMAND;
+
 
         } else return ServMessages.CHANNEL_NOT_FOUND;
     }
 
     @Override
     public String part(int user, String channel) throws RemoteException {
-        if (Server.getChannelByName(channel)!= null) {
+        if (Server.channelExists(channel)) {
             Channel ch = Server.getChannelByName(channel);
             User userWhoRequested = Server.clientsAcess.get(user);
             ch.users.remove(userWhoRequested);
@@ -129,8 +140,10 @@ public class Channel extends UnicastRemoteObject implements ChatServerInterface{
                 userWhoRequested.setNickname(userWhoRequested.getNickname().substring(1));
                 ch.admin = userWhoRequested;
             }
-            userWhoRequested.setChannel(null);
+
             echoMessage(userWhoRequested.getChannel(), userWhoRequested.getNickname() + ServMessages.USER_DISCONNECTED);
+            userWhoRequested.setChannel(null);
+            Server.lobbyClients.add(userWhoRequested);
             Server.partChannel(userWhoRequested);
 
             return ServMessages.USER_DISCONNECTED;
@@ -189,8 +202,11 @@ public class Channel extends UnicastRemoteObject implements ChatServerInterface{
     @Override
     public void message(int user, String message) throws RemoteException {
         User userWhoRequested = Server.clientsAcess.get(user);
-
-        echoMessage(userWhoRequested.getChannel(), message);
+        Channel ch = userWhoRequested.getChannel();
+        for (User u : ch.users) {
+            if(u != userWhoRequested)
+                u.getRemoteAcessForServer().message(message);
+        }
     }
 
     @Override
